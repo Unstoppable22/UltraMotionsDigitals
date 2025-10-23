@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Slideshow keyframes */
+@keyframes slideshow {
+  0%, 25% {
+    background-image: url("/images/img.jpg");
+  }
+  25.01%, 50% {
+    background-image: url("/images/img1.jpeg");
+  }
+  50.01%, 75% {
+    background-image: url("/images/img2.jpeg");
+  }
+  75.01%, 100% {
+    background-image: url("/images/img3.jpeg");
+  }
+}
+
+/* Animation utility class */
+.animate-bg-cycle {
+  animation: slideshow 10s ease-in-out infinite;
+}
