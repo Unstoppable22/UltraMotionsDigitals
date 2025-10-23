@@ -1,6 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import Booking from "../models/Booking.js"; // ✅ make sure this path is correct!
+import Booking from "../models/Booking.js";
 
 const router = express.Router();
 
