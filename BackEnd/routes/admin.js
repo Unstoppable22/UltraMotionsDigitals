@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Replace this with your own secure values or a database later
 const ADMIN_EMAIL = "admin@example.com";
-const ADMIN_PASSWORD = "123456";
+const ADMIN_PASSWORD = "123456"; 
 const JWT_SECRET = "supersecretkey"; // move to .env later
 
 router.post("/login", (req, res) => {
