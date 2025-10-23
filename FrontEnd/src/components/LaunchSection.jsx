@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../../config/env";
 
 export default function LaunchSection({ onClose, selectedLocation }) {
   const [startDate, setStartDate] = useState("");
@@ -69,22 +70,26 @@ export default function LaunchSection({ onClose, selectedLocation }) {
       const formData = new FormData();
       formData.append("billboardId", selectedLocation?.id || "N/A");
       formData.append("billboardTitle", selectedLocation?.name || "Unnamed");
-      formData.append("userId", "test-user"); // Replace with real userId if available
-      formData.append("userName", "John Doe"); // Replace with real username if logged in
+      formData.append("userId", "test-user"); // replace with actual user ID
+      formData.append("userName", "John Doe"); // replace with logged-in user's name
       formData.append("startDate", startDate);
       formData.append("endDate", endDate);
       formData.append("agreed", true);
       if (media) formData.append("media", media);
 
-      await axios.post("http://localhost:5000/api/bookings", formData, {
+      await axios.post(`${API_BASE_URL}/api/bookings`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       setSuccessMessage("✅ Booking successful!");
-      setLoading(false);
+      setStartDate("");
+      setEndDate("");
+      setMedia(null);
+      setTimeout(() => onClose(), 1500);
     } catch (err) {
       console.error(err);
       setErrorMessage("❌ Failed to submit booking.");
+    } finally {
       setLoading(false);
     }
   };

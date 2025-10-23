@@ -1,49 +1,52 @@
 import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import cors from "cors";
-import bookingRoutes from "./routes/bookings.js";
-import adminRoutes from "./routes/admin.js";
-import authRoutes from "./routes/authRoutes.js";
-import path from "path";
+import jwt from "jsonwebtoken";
+import Booking from "../models/Booking.js"; // ✅ Make sure this exists
 
-// Load environment variables
-dotenv.config();
+const router = express.Router();
 
-console.log("🟢 index.js is running"); // Just to confirm the file starts running
+const ADMIN_EMAIL = "admin@example.com";
+const ADMIN_PASSWORD = "123456";
+const JWT_SECRET = "supersecretkey";
 
-// Initialize Express
-const app = express();
+// ✅ Admin Login
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
 
-// Middleware
-app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174","https://ultra-motions-digitals-99fx.vercel.app"],
-  credentials: true,
-}));
-app.use(express.json());
-
-
-// ✅ Serve uploaded files (for images/videos)
-app.use("/uploads", express.static("uploads"));
-
-// ✅ Routes
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/auth", authRoutes);
-
-app.get("/", (req, res) => {
-  res.send("✅ Ultra Motions Digitals Backend is running!");
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    const token = jwt.sign({ role: "admin" }, JWT_SECRET, { expiresIn: "2h" });
+    res.json({ token });
+  } else {
+    res.status(401).json({ message: "Invalid credentials" });
+  }
 });
 
-// ✅ Connect to MongoDB and start the server
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB connected successfully!");
+// ✅ Get all bookings (for Admin Dashboard)
+router.get("/bookings", async (req, res) => {
+  try {
+    const bookings = await Booking.find().sort({ createdAt: -1 });
+    res.json(bookings);
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+    res.status(500).json({ message: "Failed to fetch bookings" });
+  }
+});
 
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => console.error("❌ Database connection error:", err));
+// ✅ Approve or Reject booking
+router.post("/bookings/:id/:action", async (req, res) => {
+  try {
+    const { id, action } = req.params;
+    const booking = await Booking.findById(id);
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    if (action === "approve") booking.status = "approved";
+    else if (action === "reject") booking.status = "rejected";
+
+    await booking.save();
+    res.json({ message: `Booking ${action}ed successfully` });
+  } catch (err) {
+    console.error("Error updating booking:", err);
+    res.status(500).json({ message: "Failed to update booking" });
+  }
+});
+
+export default router;
