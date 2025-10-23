@@ -31,6 +31,10 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 
+app.get("/", (req, res) => {
+  res.send("✅ Ultra Motions Digitals Backend is running!");
+});
+
 // ✅ Connect to MongoDB and start the server
 mongoose
   .connect(process.env.MONGO_URI)
