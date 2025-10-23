@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../../config/env";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ export default function AdminLogin() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/admin/login", {
+      const res = await axios.post(`${API_BASE_URL}/api/admin/login`, {
         email,
         password,
       });
@@ -23,7 +24,7 @@ export default function AdminLogin() {
       localStorage.setItem("adminToken", res.data.token);
       navigate("/dashboard");
     } catch (err) {
-      setError("Invalid email or password");
+      setError("Invalid email or password", err);
     } finally {
       setLoading(false);
     }
