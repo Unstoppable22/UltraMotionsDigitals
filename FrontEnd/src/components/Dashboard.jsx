@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../../config/env";
 
 export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
@@ -7,7 +8,7 @@ export default function Dashboard() {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/bookings");
+      const res = await axios.get(`${API_BASE_URL}/api/admin/bookings`);
       setBookings(res.data);
     } catch (err) {
       console.error(err);
@@ -21,7 +22,7 @@ export default function Dashboard() {
 
   const updateStatus = async (id, action) => {
     try {
-      const res = await axios.post(`http://localhost:5000/api/bookings/${id}/${action}`);
+      const res = await axios.post(`${API_BASE_URL}/api/admin/bookings/${id}/${action}`);
       alert(res.data.message);
       fetchBookings();
     } catch (err) {
@@ -30,9 +31,10 @@ export default function Dashboard() {
     }
   };
 
-  const filtered = bookings.filter((b) =>
-    b.userName.toLowerCase().includes(search.toLowerCase()) ||
-    b.billboardTitle.toLowerCase().includes(search.toLowerCase())
+  const filtered = bookings.filter(
+    (b) =>
+      b.userName.toLowerCase().includes(search.toLowerCase()) ||
+      b.billboardTitle.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleLogout = () => {
@@ -42,6 +44,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">📊 Admin Dashboard</h1>
         <button
@@ -52,6 +55,7 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Search */}
       <div className="mb-6">
         <input
           type="text"
@@ -62,6 +66,7 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Table */}
       <div className="overflow-x-auto bg-gray-800 rounded-lg shadow-lg border border-gray-700">
         <table className="w-full border-collapse">
           <thead>
@@ -99,7 +104,7 @@ export default function Dashboard() {
                 <td className="p-3">
                   {b.mediaUrl ? (
                     <img
-                      src={`http://localhost:5000${b.mediaUrl}`}
+                      src={`${API_BASE_URL}${b.mediaUrl}`}
                       alt="media"
                       className="w-20 rounded-md border border-gray-600"
                     />
@@ -125,6 +130,7 @@ export default function Dashboard() {
             ))}
           </tbody>
         </table>
+
         {filtered.length === 0 && (
           <p className="p-4 text-center text-gray-400">No bookings found.</p>
         )}
