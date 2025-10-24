@@ -4,16 +4,16 @@ export default function Testimonials() {
   return (
     <>
     <div className="bg-[#e5f4fb] justify-items-center lg:p-5 pb-5">
-      <h1 className="text-4xl font-bold font-mono text-center py-3 lg:py-5 text-left ">
+      <h1 className="text-4xl font-bold font-mono text-center py-3 lg:py-5 text-center ">
         Client Experiences
       </h1>
       <h2 className="text-xl py-3  text-center lg:py-0">
         Industry Success Stories: Ultra Motions Digital in Action
       </h2>
       <div className=" items-center flex-col lg:flex flex-row  space-y-8 lg:gap-5 lg:py-5 bg-[#e5f4fb]">
-        <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-left w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
+        <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-center w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
           <img
-            src="public\images\hassy.jpg"
+            src="/images/hassy.jpg"
             alt=""
             className="rounded-full w-15 h-15 "
           />
@@ -22,7 +22,7 @@ export default function Testimonials() {
           </h1>
           <h2>- Adekunle Akinola</h2>
         </div>
-        <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-left w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
+        <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-center w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
           <img
             src="public\images\aji.jpg"
             alt=""
@@ -33,7 +33,7 @@ export default function Testimonials() {
           </h1>
           <h2>- Oladimej Alabi</h2>
         </div>
-        <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-left w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
+        <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-center w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
           <img
             src="public\images\femal.jpg"
             alt=""

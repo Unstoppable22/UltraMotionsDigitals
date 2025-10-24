@@ -29,7 +29,7 @@ export default function section() {
           </div>
           <div className=" py-5">
             <img
-              src="\images\socia m.jpg"
+              src="/images/socia m.jpg"
               alt=""
               className="rounded-3xl h-90 w-100 py-2"
             />
@@ -43,7 +43,7 @@ export default function section() {
           </div>
           <div className=" py-5">
             <img
-              src="public\images\seo.jpg"
+              src="/images/seo.jpg"
               alt=""
               className="rounded-3xl h-90 w-100 py-2"
             />
@@ -59,27 +59,27 @@ export default function section() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3  py-10 bg-[#e5f4fb]">
         <img
-          src="public\images\digitalm.jpg"
+          src="/images/digitalm.jpg"
           alt=""
           className=" lg:w-[full] h-full lg:h-110"
         />
         <img 
-        src="public\images\img1.jpeg" 
+        src="/images/img1.jpeg" 
         alt="" 
         className=" w-full h-full lg:w-full h-110" />
         <img
-          src="public\images\gettyimages-2213438682-2048x2048.jpg"
+          src="/images/gettyimages-2213438682-2048x2048.jpg"
           alt=""
           className="w-[full] h-full lg:h-110"
         />
         <img
-          src="public\images\housewall.jpg"
+          src="/images/housewall.jpg"
           alt=""
           className="w-full h-full lg:h-110"
         />
-        <img src="public\images\img3.jpeg" alt="" className="w-full h-full lg:w-full h-110" />
+        <img src="/images/img3.jpeg" alt="" className="w-full h-full lg:w-full h-110" />
         <img
-          src="public\images\brt-bus.webp"
+          src="/images/brt-bus.webp"
           alt=""
           className="w-full h-full lg:h-110"
         />
