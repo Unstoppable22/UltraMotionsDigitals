@@ -15,7 +15,7 @@ export default function Testimonials() {
           <img
             src="/images/hassy.jpg"
             alt=""
-            className="rounded-full w-15 h-15 "
+            className="rounded-full w-15 h-15 " 
           />
           <h1 className="text-[15px] text-left  lg:py-5">
             Ultra Motions Digital has been a game-changer for our business. Their unmatched creativity, attention to detail, and dedication helped shape a digital presence that truly reflects our brand’s vision. We witnessed incredible growth in both engagement and sales. Their professionalism and passion shine through, and we wholeheartedly recommend them to any company aiming for success and long-term results.
