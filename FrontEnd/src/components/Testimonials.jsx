@@ -11,7 +11,7 @@ export default function Testimonials() {
         <h2 className="text-xl py-3  text-center lg:py-0">
           Industry Success Stories: Ultra Motions Digital in Action
         </h2>
-        <div className=" items-center flex-col lg:flex flex-row  space-y-8 lg:gap-5 lg:py-5 bg-[#e5f4fb]">
+        <div className="flex items-center flex-col lg:flex-row gap-10 lg:gap-5 lg:py-5 bg-[#e5f4fb]">
           <TestimonialCard
             comment="Ultra Motions Digital has been a game-changer for our business.
               Their unmatched creativity, attention to detail, and dedication
