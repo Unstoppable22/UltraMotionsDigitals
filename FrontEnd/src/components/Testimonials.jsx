@@ -14,7 +14,7 @@ export default function Testimonials() {
         <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-center w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
           <img
             src="/images/hassy.jpg"
-            alt=""
+            alt="" 
             className="rounded-full w-15 h-15 " 
           />
           <h1 className="text-[15px] text-left  lg:py-5">

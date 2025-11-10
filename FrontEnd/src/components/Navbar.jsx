@@ -5,7 +5,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="items-center justify-between flex  bg-[#102116]  lg:px-4">
+    <nav className="fixed top-0 left-0 w-full z-50 items-center justify-between flex  bg-[#102116]  lg:px-4">
       <img src="/images/logo.png" alt="Logo" className="h-[100px]" />
 
       {/* Desktop Menu */}
