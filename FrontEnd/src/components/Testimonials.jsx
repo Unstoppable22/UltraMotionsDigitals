@@ -24,18 +24,18 @@ export default function Testimonials() {
         </div>
         <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-center w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
           <img
-            src="public\images\aji.jpg"
+            src="/images/aji.jpg"
             alt=""
             className="rounded-full w-15 h-15 "
           />
           <h1 className="text-[15px] text-left py-5">
             Partnering with Ultra Motions Digital was the best decision we made for our brand. Their creativity, precision, and unwavering dedication turned our digital presence into something truly remarkable. We not only saw our engagement soar but also built a stronger connection with our audience. Their work speaks volumes, and we wholeheartedly recommend them to any business striving for excellence.
           </h1>
-          <h2>- Oladimej Alabi</h2>
+          <h2>- Oladimeji Alabi</h2>
         </div>
         <div className="rounded-xl lg:bg-[#e5f4fb] bg-gray-200 justify-items-center w-85 lg:w-full lg:h-full p-5 lg:px-10 lg:py-10">
           <img
-            src="public\images\femal.jpg"
+            src="/images/femal.jpg"
             alt=""
             className="rounded-full w-15 h-15 "
           />
@@ -47,7 +47,7 @@ export default function Testimonials() {
       </div>
     </div>
     <div className="justify-items-center bg-[#e5f4fb]">
-      <img src="public\images\Staticc.jpg" alt="" className=" w-full h-full lg:w-180 h-100"/>
+      <img src="/images/Staticc.jpg" alt="" className=" w-full h-full lg:w-180 h-100"/>
     </div>
     </>
   );
