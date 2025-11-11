@@ -96,7 +96,7 @@ export default function LaunchSection({ onClose, selectedLocation }) {
 
   const modalContent = (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] px-4">
-      <div className="max-w-xl w-full bg-white p-6 rounded-xl shadow-2xl relative overflow-y-auto max-h-[90vh] animate-fade-in">
+      <div className="max-w-xl w-full bg-[#e5f4fb] p-6 rounded-xl shadow-2xl relative overflow-y-auto max-h-[90vh] animate-fade-in">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -181,7 +181,7 @@ export default function LaunchSection({ onClose, selectedLocation }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#102116] text-white py-2 rounded font-bold hover:bg-[#101110] transition duration-200"
+            className="w-full bg-gray-900 text-white py-2 rounded font-bold hover:bg-[#101110] transition duration-200"
           >
             {loading ? "Submitting..." : "BOOK NOW"}
           </button>

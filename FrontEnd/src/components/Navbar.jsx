@@ -5,7 +5,7 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 items-center justify-between flex  bg-[#102116]  lg:px-4">
+    <nav className=" top-0 left-0 w-full z-50 items-center justify-between flex  bg-gray-900  lg:px-4">
       <img src="/images/logo.png" alt="Logo" className="h-[100px]" />
 
       {/* Desktop Menu */}
@@ -35,7 +35,7 @@ export default function Navbar() {
 
       {/* Mobile Fullscreen Menu */}
       {isMenuOpen && (
-        <ul className="fixed inset-0 bg-[#102116] bg-opacity-95 flex flex-col items-center justify-center gap-8 text-white text-2xl z-50">
+        <ul className="fixed inset-0  bg-black/25 backdrop-blur-sm flex flex-col items-center justify-center gap-8 text-white text-2xl z-50">
           <li><Link to="/admin/login" onClick={() => setIsMenuOpen(false)}>Admin</Link></li>
           <li><Link to="/" onClick={() => setIsMenuOpen(false)}>Home</Link></li>
           <li><Link to="/category" onClick={() => setIsMenuOpen(false)}>Service</Link></li>

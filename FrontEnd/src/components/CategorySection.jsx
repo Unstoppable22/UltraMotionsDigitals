@@ -2,7 +2,7 @@ import React from "react";
 
 function ServiceCard({ service, onChoose }) {
   return (
-    <div className="border rounded-lg overflow-hidden shadow-sm flex flex-col">
+    <div className="border rounded-lg overflow-hidden shadow-sm flex flex-col ">
       <img  
         src={service.image}
         alt={service.title}
@@ -15,7 +15,7 @@ function ServiceCard({ service, onChoose }) {
           From <span className="line-through text-gray-400">{service.originalPrice}</span> {service.price} 
         </p>
         <button
-          className="mt-auto border border-[#102116] rounded px-4 py-2 text-center hover:bg-[#102116] hover:text-white transition"
+          className="mt-auto border border-[#102116] rounded px-4 py-2 text-center hover:bg-gray-900 hover:text-white transition"
           onClick={() => onChoose(service)}
         >
           Choose Options

@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Faq from "./components/Faq";
 import AboutUs from "./pages/AboutUs";
 import CategorySectionGroup from "./components/CategorySectionGroup";
+import Testimonials from "./components/Testimonials";
 import LaunchSection from "./components/LaunchSection";
 import Dashboard from "./components/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
@@ -17,6 +18,7 @@ export default function App() {
     <Router>
       <Navbar />
       <Routes>
+        <Route path="/Testimonials" element={<Testimonials />} />
         <Route path="/" element={<Home />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/about" element={<AboutUs />} />

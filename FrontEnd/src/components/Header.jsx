@@ -19,7 +19,7 @@ export default function Header() {
           Expand your Audience, Elevate your Brand
         </h1>
         <h2 className="text-white text-2xl max-w-3xl mx-auto">
-          Amplify your brand's presence with innovative digital strategies from ULTRA MOTIONS DIGITALS, the leading marketing agency in Lagos.
+          Amplify your brand's presence with innovative digital strategies from ULTRA MOTIONS DIGITALS, the leading marketing agency in Nigeria.
         </h2>
         <button
           onClick={handleNavigation}

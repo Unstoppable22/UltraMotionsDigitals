@@ -40,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex bg-gray-900 text-white">
-      <aside className="w-56 bg-gray-800 p-5 flex flex-col justify-between">
+      <aside className=" w-30 lg:w-56 bg-gray-800 p-5 flex flex-col justify-between">
         <div>
           <h1 className="text-xl font-bold mb-6">Admin Panel</h1>
           {["bookings", "stats"].map((t) => (
@@ -66,10 +66,10 @@ export default function Dashboard() {
         </button>
       </aside>
 
-      <main className="flex-1 p-6 overflow-auto">
+      <main className="flex-1 p-4 lg:p-6 overflow-auto">
         {tab === "bookings" ? (
           <>
-            <div className="flex justify-between mb-4">
+            <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 justify-between mb-4">
               <h2 className="text-2xl font-semibold">Bookings</h2>
               <input
                 className="bg-gray-800 p-2 rounded border border-gray-700"
@@ -80,20 +80,25 @@ export default function Dashboard() {
             </div>
 
             <div className="overflow-x-auto bg-gray-800 rounded border border-gray-700">
-              <table className="w-full">
+              <table className="w-full min-w-max">
                 <thead className="bg-gray-700 text-gray-300">
                   <tr>
-                    <th>Billboard</th><th>User</th><th>Status</th>
-                    <th>Start</th><th>End</th><th>Media</th><th>Action</th>
+                    <th className="px-4 py-3 text-left">Billboard</th>
+                    <th className="px-4 py-3 text-left">User</th>
+                    <th className="px-4 py-3 text-left">Status</th>''''''''''''''''''
+                    <th className="px-4 py-3 text-left">Start</th>
+                    <th className="px-4 py-3 text-left">End</th>
+                    <th className="px-4 py-3 text-left">Media</th>
+                    <th className="px-4 py-3 text-left">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((b) => (
                     <tr key={b._id} className="border-t border-gray-700">
-                      <td>{b.billboardTitle}</td>
-                      <td>{b.userName}</td>
+                      <td className="px-4 py-2">{b.billboardTitle}</td>
+                      <td className="px-4 py-2">{b.userName}</td>
                       <td
-                        className={`font-semibold ${
+                        className={`px-4 py-2 font-semibold ${
                           b.status === "approved"
                             ? "text-green-400"
                             : b.status === "rejected"
@@ -103,9 +108,13 @@ export default function Dashboard() {
                       >
                         {b.status}
                       </td>
-                      <td>{new Date(b.startDate).toDateString()}</td>
-                      <td>{new Date(b.endDate).toDateString()}</td>
-                      <td>
+                      <td className="px-4 py-2">
+                        {b.startDate ? new Date(b.startDate).toDateString() : "—"}
+                      </td>
+                      <td className="px-4 py-2">
+                        {b.endDate ? new Date(b.endDate).toDateString() : "—"}
+                      </td>
+                      <td className="px-4 py-2">
                         {b.mediaUrl ? (
                           <img
                             src={`${API_BASE_URL}${b.mediaUrl}`}
@@ -116,16 +125,18 @@ export default function Dashboard() {
                           "No media"
                         )}
                       </td>
-                      <td>
+                      <td className="px-4 py-2">
                         <button
                           onClick={() => updateStatus(b._id, "approve")}
                           className="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-sm mr-1"
+                          title="Approve"
                         >
                           ✅
                         </button>
                         <button
                           onClick={() => updateStatus(b._id, "reject")}
                           className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-sm"
+                          title="Reject"
                         >
                           ❌
                         </button>
@@ -135,9 +146,7 @@ export default function Dashboard() {
                 </tbody>
               </table>
               {!filtered.length && (
-                <p className="p-4 text-center text-gray-400">
-                  No bookings found.
-                </p>
+                <p className="p-4 text-center text-gray-400">No bookings found.</p>
               )}
             </div>
           </>

@@ -90,11 +90,11 @@ export default function Faq() {
         </div>
       </div>
     </div>
-    <div className=" bg-[#102116] backdrop-blur-xl py-10 flex justify-center px-10 ">
-      <div className="text-center p-10 lg:py-10 lg:px-30 bg-[#4d605c] text-white rounded-lg ">
+    <div className=" bg-gray-500 backdrop-blur-xl py-10 flex justify-center px-10 ">
+      <div className="text-center p-10 lg:py-10 lg:px-30 bg-[#e5f4fb] text-black rounded-lg ">
         <h1 className="text-[30px] lg:text-[35px] font-mono">Boost Your Brand Today</h1>
         <h2 className="text-[20px]">Unlock new levels of digital success with our cutting-edge marketing strategies and innovative advertising solutions tailored for your business needs in Lagos.</h2>
-       <button onClick={handleNavigation} className='hover:bg-black/25 backdrop-blur-sm text-white text-xl drop-shadow-lg border border-white px-8 py-3 rounded-md mt-8 inline-block'>
+       <button onClick={handleNavigation} className='hover:bg-black/25 backdrop-blur-sm text-black text-xl drop-shadow-lg border border-black px-8 py-3 rounded-md mt-8 inline-block'>
   Get Started
 </button>
       </div>

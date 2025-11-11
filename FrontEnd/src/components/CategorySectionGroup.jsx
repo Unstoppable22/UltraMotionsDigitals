@@ -31,8 +31,8 @@ export default function CategorySectionGroup() {
   }, [searchTerm]);
 
   return (
-    <div className="px-6 py-10 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-6">Explore Ad Spaces</h1>
+    <div className="px-6 py-10 max-w-7xl mx-auto bg-[#e5f4fb]">
+      <h1 className="text-3xl font-semibold mb-6 ">Explore Ad Spaces</h1>
 
       {/* Search Input */}
       <input
@@ -40,7 +40,7 @@ export default function CategorySectionGroup() {
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
         placeholder="Search by location or title"
-        className="w-full border border-gray-300 px-4 py-3 rounded-lg mb-10 shadow-sm"
+        className="w-full border border-gray-900 px-4 py-3 rounded-lg mb-10 shadow-sm"
         autoComplete="off"
         aria-label="Search locations or titles"
       />

@@ -2,7 +2,7 @@ import React from "react";
 
 export default function AboutUs() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-16">
+    <div className="max-w-4xl mx-auto px-6 py-16 bg-blue-100">
       <marquee behavior="scroll" direction="left" scrollamount="5" className="mb-10">
         <img src="/images/img.jpg" alt="Ad 1" className="inline-block h-32 mx-4 rounded" />
         <img src="/images\socia m.jpg" alt="Ad 2" className="inline-block h-32 mx-4 rounded" />
@@ -21,11 +21,11 @@ export default function AboutUs() {
       </p>
 
       <p className="text-lg leading-relaxed text-gray-700 mb-6">
-        From bustling city billboards and vibrant LED displays to eye-catching wall drapes and BRT bus branding, our extensive network covers every corner of the nation. No matter your size or industry, we tailor each campaign to deliver maximum visibility and engagement  helping you reach the right audience at the right time.
+        From bustling city billboards and vibrant LED displays to eye catching wall drapes and BRT bus branding, our extensive network covers every corner of the nation. No matter your size or industry, we tailor each campaign to deliver maximum visibility and engagement  helping you reach the right audience at the right time.
       </p>
 
       <p className="text-lg leading-relaxed text-gray-700 mb-6">
-        What sets us apart is our commitment to seamless service and partnership. From the moment you reach out, our dedicated team works closely with you to craft a smooth, hassle-free experience guiding you through every step from initial consultation to campaign launch and beyond.
+        What sets us apart is our commitment to seamless service and partnership. From the moment you reach out, our dedicated team works closely with you to craft a smooth, hassle free experience guiding you through every step from initial consultation to campaign launch and beyond.
       </p>
 
       <p className="text-lg leading-relaxed text-gray-700">
