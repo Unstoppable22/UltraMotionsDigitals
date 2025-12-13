@@ -44,9 +44,9 @@ export default function Testimonials() {
               to delivering excellence is evident, and we confidently recommend
               their services to any business looking to achieve lasting success
               and remarkable impact."
-            name="- Ogunsanwo Mideeee"
-            image="/images/femal.jpg"
-          />
+            name="- Ogunsanwo Mide"
+ image="/images/femal.jpg"
+  />
         </div>
       </div>
       <div className="justify-items-center bg-[#e5f4fb]">

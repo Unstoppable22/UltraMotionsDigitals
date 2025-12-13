@@ -2,10 +2,14 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  name: { type: String }, // optional, combine firstName + lastName
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-});
+  phone: { type: String }, // optional for WhatsApp
+  role: { type: String, default: "user" },
+}, { timestamps: true });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

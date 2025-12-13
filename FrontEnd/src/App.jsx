@@ -12,6 +12,8 @@ import AdminLogin from "./pages/AdminLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
+import Profile from "./components/Profile";
+import UserDashboard from "./pages/UserDashboard";
 
 export default function App() {
   return (
@@ -27,11 +29,31 @@ export default function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+
+        {/* 🔒 Protect routes */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/user-dashboard"
+          element={
+            <ProtectedRoute>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
             </ProtectedRoute>
           }
         />
