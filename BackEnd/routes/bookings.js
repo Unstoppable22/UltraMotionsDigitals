@@ -2,97 +2,100 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import Booking from "../models/Booking.js";
+import sendEmail from "../utils/sendEmail.js";
 
 const router = express.Router();
 
-// ✅ Configure Multer storage
+/* ================= MULTER CONFIG ================= */
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: "uploads/",
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ["image/", "video/"];
-    if (allowedTypes.some((type) => file.mimetype.startsWith(type))) {
-      cb(null, true);
-    } else {
-      cb(new Error("Invalid file type. Only image or video allowed."));
-    }
-  },
-});
+const upload = multer({ storage });
 
-// ✅ CREATE new booking
+/* ================= CREATE BOOKING ================= */
 router.post("/", upload.single("media"), async (req, res) => {
   try {
-    const { billboardId, billboardTitle, userId, userName, startDate, endDate } = req.body;
-
-    const newBooking = new Booking({
-      billboardId,
-      billboardTitle,
+    const {
       userId,
       userName,
+      userEmail,
+      campaignType,
+      billboardTitle,
+      startDate,
+      endDate,
+    } = req.body;
+
+    const booking = await Booking.create({
+      userId,
+      userName,
+      userEmail,
+      campaignType,
+      billboardTitle,
       startDate,
       endDate,
       mediaUrl: req.file ? `/uploads/${req.file.filename}` : null,
     });
 
-    await newBooking.save();
-    res.status(201).json({ message: "✅ Booking created successfully", booking: newBooking });
+    /* ===== ADMIN EMAIL ===== */
+    await sendEmail({
+      to: "ultramotionng@gmail.com",
+      subject: "📢 New Campaign Booking",
+      html: `
+        <h2>New Booking</h2>
+        <p><b>Name:</b> ${userName}</p>
+        <p><b>Email:</b> ${userEmail}</p>
+        <p><b>Campaign:</b> ${campaignType}</p>
+      `,
+    });
+
+    /* ===== CLIENT EMAIL ===== */
+    await sendEmail({
+      to: userEmail,
+      subject: "✅ Booking Received",
+      html: `
+        <h2>Thank you for your booking</h2>
+        <p>Your campaign request has been received.</p>
+        <p>Status: <b>Pending approval</b></p>
+      `,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Booking created successfully",
+      booking,
+    });
   } catch (error) {
-    console.error("❌ Error creating booking:", error);
-    res.status(500).json({ message: "Failed to create booking" });
+    console.error(error);
+    res.status(500).json({ message: "Booking failed" });
   }
 });
 
-// ✅ GET all bookings
+/* ================= ADMIN ACTIONS ================= */
 router.get("/", async (req, res) => {
-  try {
-    const bookings = await Booking.find().sort({ createdAt: -1 });
-    res.status(200).json(bookings);
-  } catch (error) {
-    console.error("❌ Error fetching bookings:", error);
-    res.status(500).json({ message: "Failed to fetch bookings" });
-  }
+  const bookings = await Booking.find().sort({ createdAt: -1 });
+  res.json(bookings);
 });
 
-// ✅ APPROVE booking
 router.post("/:id/approve", async (req, res) => {
-  try {
-    const updated = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { status: "approved" },
-      { new: true }
-    );
-
-    if (!updated) return res.status(404).json({ message: "Booking not found" });
-    res.json({ message: "✅ Booking approved successfully", booking: updated });
-  } catch (error) {
-    console.error("❌ Error approving booking:", error);
-    res.status(500).json({ message: "Failed to approve booking" });
-  }
+  const booking = await Booking.findByIdAndUpdate(
+    req.params.id,
+    { status: "approved" },
+    { new: true }
+  );
+  res.json(booking);
 });
 
-// ✅ REJECT booking
 router.post("/:id/reject", async (req, res) => {
-  try {
-    const updated = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { status: "rejected" },
-      { new: true }
-    );
-
-    if (!updated) return res.status(404).json({ message: "Booking not found" });
-    res.json({ message: "🚫 Booking rejected successfully", booking: updated });
-  } catch (error) {
-    console.error("❌ Error rejecting booking:", error);
-    res.status(500).json({ message: "Failed to reject booking" });
-  }
+  const booking = await Booking.findByIdAndUpdate(
+    req.params.id,
+    { status: "rejected" },
+    { new: true }
+  );
+  res.json(booking);
 });
 
 export default router;
