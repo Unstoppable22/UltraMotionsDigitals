@@ -9,28 +9,29 @@ import Testimonials from "./components/Testimonials";
 import LaunchSection from "./components/LaunchSection";
 import Dashboard from "./components/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
-import ProtectedRoute from "./components/ProtectedRoute";
+import UserDashboard from "./pages/UserDashboard";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
-import UserDashboard from "./pages/UserDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/Testimonials" element={<Testimonials />} />
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/about" element={<AboutUs />} />
         <Route path="/category" element={<CategorySectionGroup />} />
         <Route path="/launch" element={<LaunchSection />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/testimonials" element={<Testimonials />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
 
-        {/* 🔒 Protect routes */}
+        {/* User Protected Routes */}
         <Route
           path="/dashboard"
           element={
@@ -39,7 +40,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/user-dashboard"
           element={
@@ -48,12 +48,21 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/profile"
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Protected Routes */}
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

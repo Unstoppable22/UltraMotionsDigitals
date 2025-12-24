@@ -1,115 +1,76 @@
-import express from "express";
-import jwt from "jsonwebtoken";
-import User from "../models/User.js";
-import Booking from "../models/Booking.js";
-import authMiddleware from "../middleware/authMiddleware.js";
+// src/pages/AdminLogin.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const router = express.Router();
+export default function AdminLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-const ADMIN_EMAIL = "admin@example.com";
-const ADMIN_PASSWORD = "123456";
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
-// ✅ Admin Login
-router.post("/login", (req, res) => {
-  const { email, password } = req.body;
+    try {
+      const res = await axios.post("https://tenvx.com/ops/login", {
+        email,
+        password,
+      });
 
-  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-    const token = jwt.sign({ role: "admin" }, JWT_SECRET, { expiresIn: "2h" });
-    return res.json({ token });
-  } 
-  res.status(401).json({ message: "Invalid credentials" });
-});
+      // Save token in localStorage
+      localStorage.setItem("adminToken", res.data.token);
 
-// ===============================
-// Users
-// ===============================
+      // Redirect to admin dashboard
+      navigate("/admin/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message || "Login failed. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-// Get all users
-router.get("/users", authMiddleware, async (req, res) => {
-  try {
-    const users = await User.find().select("-password");
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch users" });
-  }
-});
-
-// Get single user
-router.get("/users/:id", authMiddleware, async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch user" });
-  }
-});
-
-// Update user
-router.put("/users/:id", authMiddleware, async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email },
-      { new: true }
-    ).select("-password");
-    res.json({ message: "User updated", user: updatedUser });
-  } catch (err) {
-    res.status(500).json({ message: "Update failed" });
-  }
-});
-
-// Delete user
-router.delete("/users/:id", authMiddleware, async (req, res) => {
-  try {
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: "User deleted" });
-  } catch (err) {
-    res.status(500).json({ message: "Delete failed" });
-  }
-});
-
-// ===============================
-// Bookings
-// ===============================
-
-router.get("/bookings", authMiddleware, async (req, res) => {
-  try {
-    const bookings = await Booking.find().sort({ createdAt: -1 });
-    res.json(bookings);
-  } catch (err) {
-    res.status(500).json({ message: "Server error fetching bookings" });
-  }
-});
-
-router.post("/bookings/:id/approve", authMiddleware, async (req, res) => {
-  try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id, 
-      { status: "approved" }, 
-      { new: true }
-    );
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
-    res.json({ message: "Booking approved", booking });
-  } catch (err) {
-    res.status(500).json({ message: "Error approving booking" });
-  }
-});
-
-router.post("/bookings/:id/reject", authMiddleware, async (req, res) => {
-  try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id, 
-      { status: "rejected" }, 
-      { new: true }
-    );
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
-    res.json({ message: "Booking rejected", booking });
-  } catch (err) {
-    res.status(500).json({ message: "Error rejecting booking" });
-  }
-});
-
-export default router;
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
+        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block mb-1">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block mb-1">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
