@@ -29,7 +29,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://ultra-motions-digitals-99fx.vercel.app"
+      "https://ultra-motions-digitals-99fx.vercel.app",
+      "https://ultramotiondigitals.com",
+      "https://www.ultramotiondigitals.com"
     ];
 
 app.use(

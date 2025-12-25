@@ -2,8 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import Booking from "../models/Booking.js";
-import sendEmail from "../utils/sendEmail.js";
-
+import { sendEmail } from "../utils/sendEmail.js";  
 const router = express.Router();
 
 /* ================= MULTER CONFIG ================= */
