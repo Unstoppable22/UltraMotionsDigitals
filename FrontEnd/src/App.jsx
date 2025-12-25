@@ -20,8 +20,8 @@ import Signup from "./components/Signup";
 import Login from "./components/Login";
 
 // Admin Pages - DOUBLE CHECK THESE PATHS FOR CASE SENSITIVITY
-import AdminLogin from "./pages/Admin/AdminLogin";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // Route Protection
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -50,9 +50,9 @@ export default function App() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         {/* ADMIN ROUTES */}
-        <Route path="/Admin/login" element={<AdminLogin />} />
+        <Route path="/AdminLogin" element={<AdminLogin />} />
         <Route
-          path="/Admin/Dashboard"
+          path="/AdminDashboard"
           element={
             <ProtectedRoute adminOnly>
               <AdminDashboard 
