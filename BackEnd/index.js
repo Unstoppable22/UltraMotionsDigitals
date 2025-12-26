@@ -36,10 +36,24 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("CORS Blocked for origin:", origin); // Helps you debug in Render logs
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
+
+app.options("*", cors());
 
 // ------------------------------
 // Routes
@@ -82,3 +96,19 @@ const startServer = async () => {
 };
 
 startServer();
+const axios = require('axios'); // or use fetch
+
+const keepAlive = () => {
+  const url = `https://ultramotionsdigitals.onrender.com`; // Your backend URL
+  
+  setInterval(async () => {
+    try {
+      await axios.get(url);
+      console.log("⚓ Keep-alive ping sent successfully");
+    } catch (err) {
+      console.error("❌ Keep-alive failed:", err.message);
+    }
+  }, 840000); // 14 minutes in milliseconds
+};
+
+keepAlive();
