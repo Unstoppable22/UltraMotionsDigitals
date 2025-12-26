@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import axios from "axios"; // ✅ Use 'import' instead of 'require'
+import axios from "axios";
 
 import bookingRoutes from "./routes/bookings.js";
 import adminRoutes from "./routes/admin.js";
@@ -14,12 +14,8 @@ const app = express();
 console.log("✅ Backend starting...");
 
 // ------------------------------
-// Middleware
+// 1. CORS Configuration (MUST BE FIRST)
 // ------------------------------
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static("uploads"));
-
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -28,10 +24,9 @@ const allowedOrigins = [
   "https://www.ultramotiondigitals.com"
 ];
 
-// 2. Use the CORS middleware with 'preflightContinue: false'
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps)
+    // Allow requests with no origin (like mobile apps or pings)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.includes(origin)) {
@@ -44,58 +39,70 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  optionsSuccessStatus: 200 
 }));
 
-app.options("*path", cors()); // ✅ Handle preflight
+// ------------------------------
+// 2. Standard Middleware
+// ------------------------------
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static("uploads"));
 
 // ------------------------------
-// Routes
+// 3. Routes
 // ------------------------------
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/auth", authRoutes);
-
 app.get("/", (req, res) => {
   res.send("✅ Ultra Motions Digitals Backend is running!");
 });
 
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/auth", authRoutes);
+
 // ------------------------------
-// Global error handler
+// 4. Global Error Handler
 // ------------------------------
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ message: "Something went wrong!", error: err.message });
+  res.status(500).json({ 
+    message: "Something went wrong!", 
+    error: err.message 
+  });
 });
 
 // ------------------------------
-// Keep-Alive Logic
+// 5. Keep-Alive Logic (Modified to avoid errors)
 // ------------------------------
 const keepAlive = () => {
-  const url = `https://ultramotionsdigitals.onrender.com`; 
+  const url = `https://ultramotionsdigitals.onrender.com/`; 
   setInterval(async () => {
     try {
+      // Use a simple head request or get to the root
       await axios.get(url);
       console.log("⚓ Keep-alive ping sent successfully");
     } catch (err) {
       console.error("❌ Keep-alive failed:", err.message);
     }
-  }, 840000); 
+  }, 840000); // 14 minutes
 };
 
 // ------------------------------
-// Database & Server
+// 6. Database & Server Start
 // ------------------------------
 const startServer = async () => {
   try {
-    // Note: Latest Mongoose doesn't need useNewUrlParser/useUnifiedTopology
+    if (!process.env.MONGO_URI) {
+        throw new Error("MONGO_URI is missing from .env file");
+    }
+    
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ MongoDB connected successfully!");
 
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      keepAlive(); // ✅ Start pinging once the server is up
+      keepAlive(); 
     });
   } catch (err) {
     console.error("❌ Database connection error:", err.message);

@@ -9,16 +9,27 @@ export default function Signup() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSignup = async (e) => {
+const handleSignup = async (e) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
+    
     try {
-      await axios.post("https://ultramotionsdigitals.onrender.com/api/auth/signup", { name, email, password });
+      const response = await axios.post(
+        "https://ultramotionsdigitals.onrender.com/api/auth/signup", 
+        { name, email, password },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true // Matches the 'credentials: true' in your Backend CORS
+        }
+      );
+      
+      console.log("Signup successful:", response.data);
       navigate("/login");
     } catch (err) {
-      setError("Signup failed. Try again.");
+      console.error("Signup error details:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "Signup failed. Try again.");
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
       <form onSubmit={handleSignup} className="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-sm">
