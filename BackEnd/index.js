@@ -63,8 +63,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
 // ------------------------------
-// 3. Routes
+// 3. Routes (Wrapped in a check)
 // ------------------------------
+app.use("/api/auth", (req, res, next) => {
+    console.log(`📩 Auth Route Hit: ${req.method} ${req.url}`);
+    next();
+}, authRoutes);
+
+app.use("/api/bookings", bookingRoutes);
+app.use("/api/admin", adminRoutes);
+
 app.get("/", (req, res) => {
   res.send("✅ Ultra Motions Digitals Backend is running!");
 });
