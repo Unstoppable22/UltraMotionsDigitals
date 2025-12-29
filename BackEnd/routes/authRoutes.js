@@ -5,32 +5,40 @@ import User from "../models/User.js";
 import multer from "multer";
 import path from "path";
 import nodemailer from "nodemailer";
-
-// ✅ Only import protect, do NOT redefine it
+import fs from "fs"; // Added to handle directory creation
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
+// ✅ Ensure uploads directory exists on start
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
 // ------------------------------
-// Multer storage for profile photos
+// Multer storage (Fixed for Render)
 // ------------------------------
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, req.user.id + "_" + Date.now() + ext);
+    // Use a unique timestamp/random combo since req.user isn't available yet
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, "profile_" + uniqueSuffix + ext);
   }
 });
 const upload = multer({ storage });
 
 // ------------------------------
-// SIGNUP
+// SIGNUP (Already good)
 // ------------------------------
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-    if (await User.findOne({ email })) {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
@@ -55,7 +63,7 @@ router.post("/signup", async (req, res) => {
 });
 
 // ------------------------------
-// LOGIN
+// LOGIN (Already good)
 // ------------------------------
 router.post("/login", async (req, res) => {
   try {
@@ -79,48 +87,14 @@ router.post("/login", async (req, res) => {
 });
 
 // ------------------------------
-// Protected Routes (Use protect middleware)
+// PHOTO UPLOAD (Logic Fixed)
 // ------------------------------
-router.get("/profile", protect, async (req, res) => {
-  const user = await User.findById(req.user.id).select("-password");
-  res.json(user);
-});
-
-router.put("/profile", protect, async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      { name, email },
-      { new: true }
-    ).select("-password");
-
-    res.json({ message: "Profile updated successfully", user: updatedUser });
-  } catch (error) {
-    res.status(500).json({ message: "Update failed", error: error.message });
-  }
-});
-
-router.put("/change-password", protect, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    const user = await User.findById(req.user.id);
-
-    if (!await bcrypt.compare(currentPassword, user.password)) {
-      return res.status(400).json({ message: "Current password is incorrect" });
-    }
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-
-    res.json({ message: "Password changed successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Password change failed", error: error.message });
-  }
-});
-
+// NOTE: Protect must come BEFORE upload.single if you want to use req.user inside the filename logic,
+// BUT Multer usually parses the body first. This order works best:
 router.post("/profile/photo", protect, upload.single("profilePhoto"), async (req, res) => {
   try {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -133,52 +107,5 @@ router.post("/profile/photo", protect, upload.single("profilePhoto"), async (req
   }
 });
 
-// ------------------------------
-// Forgot & Reset Password
-// ------------------------------
-router.post("/forgot-password", async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
-
-    const resetToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "15m" });
-    const resetLink = `https://yourfrontend.com/reset-password/${resetToken}`;
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Password Reset",
-      html: `<p>Click <a href="${resetLink}">here</a> to reset your password. Expires in 15 minutes.</p>`
-    });
-
-    res.json({ message: "Password reset email sent" });
-  } catch (error) {
-    res.status(500).json({ message: "Forgot password failed", error: error.message });
-  }
-});
-
-router.post("/reset-password/:token", async (req, res) => {
-  try {
-    const { password } = req.body;
-    const { token } = req.params;
-
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await User.findByIdAndUpdate(decoded.id, { password: hashedPassword });
-    res.json({ message: "Password reset successful" });
-  } catch (error) {
-    res.status(400).json({ message: "Invalid or expired token", error: error.message });
-  }
-});
-
+// ... (Keep the rest of your routes as they were)
 export default router;

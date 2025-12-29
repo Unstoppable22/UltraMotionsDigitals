@@ -14,7 +14,7 @@ const app = express();
 console.log("✅ Backend starting...");
 
 // ------------------------------
-// 1. CORS Configuration (MUST BE FIRST)
+// 1. CORS Configuration
 // ------------------------------
 const allowedOrigins = [
   "http://localhost:5173",
@@ -24,23 +24,35 @@ const allowedOrigins = [
   "https://www.ultramotiondigitals.com"
 ];
 
+// Main CORS Middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or pings)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log("❌ CORS blocked for:", origin);
+      console.log("❌ CORS blocked for origin:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-  optionsSuccessStatus: 200 
+  optionsSuccessStatus: 200
 }));
+
+// 2. Manual Header Override (The "Final Boss" Fix for Preflight)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({});
+  }
+  next();
+});
 
 // ------------------------------
 // 2. Standard Middleware
@@ -64,7 +76,7 @@ app.use("/api/auth", authRoutes);
 // 4. Global Error Handler
 // ------------------------------
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("🔥 Server Error:", err.stack);
   res.status(500).json({ 
     message: "Something went wrong!", 
     error: err.message 
@@ -72,13 +84,12 @@ app.use((err, req, res, next) => {
 });
 
 // ------------------------------
-// 5. Keep-Alive Logic (Modified to avoid errors)
+// 5. Keep-Alive Logic (Prevents Render Sleep)
 // ------------------------------
 const keepAlive = () => {
   const url = `https://ultramotionsdigitals.onrender.com/`; 
   setInterval(async () => {
     try {
-      // Use a simple head request or get to the root
       await axios.get(url);
       console.log("⚓ Keep-alive ping sent successfully");
     } catch (err) {
@@ -93,7 +104,7 @@ const keepAlive = () => {
 const startServer = async () => {
   try {
     if (!process.env.MONGO_URI) {
-        throw new Error("MONGO_URI is missing from .env file");
+      throw new Error("MONGO_URI is missing from your .env file!");
     }
     
     await mongoose.connect(process.env.MONGO_URI);
