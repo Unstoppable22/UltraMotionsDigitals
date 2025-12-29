@@ -17,16 +17,17 @@ console.log("✅ Backend starting...");
 // 1. CORS Configuration
 // ------------------------------
 const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "https://ultra-motions-digitals-99fx.vercel.app",
   "https://ultramotiondigitals.com",
-  "https://www.ultramotiondigitals.com"
+  "https://ultramotiondigitals.com/",
+  "https://www.ultramotiondigitals.com",
+  "http://localhost:5173", // Keep this for your local testing
+  "https://ultra-motions-digitals-99fx.vercel.app"
 ];
 
 // Main CORS Middleware
 app.use(cors({
   origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or keep-alive pings)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
