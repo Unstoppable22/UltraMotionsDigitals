@@ -13,39 +13,37 @@ dotenv.config();
 const app = express();
 
 // ------------------------------
-// 1. CLEANED ORIGINS (No trailing slashes!)
-// ------------------------------
+// 1. Define allowed origins clearly
 const allowedOrigins = [
   "https://ultramotiondigitals.com",
   "https://www.ultramotiondigitals.com",
-  "http://localhost:5173",
   "https://ultra-motions-digitals-99fx.vercel.app"
 ];
 
-// ------------------------------
-// 2. THE "FORCED" HEADER OVERRIDE (Must be first)
-// ------------------------------
+// 2. The ONLY CORS Middleware you need
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  
-  // Check if the request origin is in our allowed list
+
+  // If the origin is in our list, allow it specifically
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
-  } else if (!origin) {
-    // Allow non-browser requests (like your keep-alive ping)
-    res.setHeader("Access-Control-Allow-Origin", "*");
+  } else {
+    // For debugging: this helps you see in Render logs if a new URL is trying to connect
+    console.log("Origin not explicitly allowed:", origin);
   }
 
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
 
-  // Handle Preflight (The browser's handshake)
+  // IMMEDIATELY handle the browser's "handshake" (OPTIONS)
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
+  
   next();
 });
+
 
 // Standard CORS as a backup
 app.use(cors({
