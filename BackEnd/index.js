@@ -12,38 +12,35 @@ dotenv.config();
 
 const app = express();
 
-// ------------------------------
-// 1. Define allowed origins clearly
+// 1. Clean list of domains
 const allowedOrigins = [
   "https://ultramotiondigitals.com",
   "https://www.ultramotiondigitals.com",
-  "https://ultra-motions-digitals-99fx.vercel.app"
+  "https://ultra-motions-digitals-99fx.vercel.app",
+  "http://localhost:5173"
 ];
 
-// 2. The ONLY CORS Middleware you need
+// 2. Dynamic CORS Header Logic
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  // If the origin is in our list, allow it specifically
+  // If the requester's origin is in our allowed list, reflect it back exactly
   if (allowedOrigins.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
-  } else {
-    // For debugging: this helps you see in Render logs if a new URL is trying to connect
-    console.log("Origin not explicitly allowed:", origin);
-  }
-
+  } 
+  
+  // These MUST be present for the browser to allow the 201 response through
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
 
-  // IMMEDIATELY handle the browser's "handshake" (OPTIONS)
+  // Handle the Preflight (handshake)
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
   
   next();
 });
-
 
 // Standard CORS as a backup
 app.use(cors({
