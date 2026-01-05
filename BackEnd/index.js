@@ -11,23 +11,21 @@ import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 
 const app = express();
-console.log("✅ Backend starting...");
+console.log("✅ Backend initializing...");
 
 // ------------------------------
 // 1. CORS Configuration
 // ------------------------------
 const allowedOrigins = [
   "https://ultramotiondigitals.com",
-  "https://ultramotiondigitals.com/",
   "https://www.ultramotiondigitals.com",
-  "http://localhost:5173", // Keep this for your local testing
+  "http://localhost:5173",
   "https://ultra-motions-digitals-99fx.vercel.app"
 ];
 
-// Main CORS Middleware
+// Standard CORS Middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or keep-alive pings)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -39,7 +37,7 @@ app.use(cors({
   optionsSuccessStatus: 200
 }));
 
-// 2. Manual Header Override (The "Final Boss" Fix for Preflight)
+// Manual Header Override (The "Final Boss" Fix for Preflight & Multipart)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
@@ -47,7 +45,7 @@ app.use((req, res, next) => {
   }
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).json({});
@@ -63,23 +61,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
 // ------------------------------
-// 3. Routes (Wrapped in a check)
+// 3. Routes
 // ------------------------------
-app.use("/api/auth", (req, res, next) => {
-    console.log(`📩 Auth Route Hit: ${req.method} ${req.url}`);
-    next();
-}, authRoutes);
-
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/admin", adminRoutes);
-
+// Root route for health check
 app.get("/", (req, res) => {
   res.send("✅ Ultra Motions Digitals Backend is running!");
 });
 
+// API Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/auth", authRoutes);
 
 // ------------------------------
 // 4. Global Error Handler
@@ -93,14 +85,14 @@ app.use((err, req, res, next) => {
 });
 
 // ------------------------------
-// 5. Keep-Alive Logic (Prevents Render Sleep)
+// 5. Keep-Alive Logic
 // ------------------------------
 const keepAlive = () => {
   const url = `https://ultramotionsdigitals.onrender.com/`; 
   setInterval(async () => {
     try {
       await axios.get(url);
-      console.log("⚓ Keep-alive ping sent successfully");
+      console.log("⚓ Keep-alive ping sent");
     } catch (err) {
       console.error("❌ Keep-alive failed:", err.message);
     }
@@ -113,7 +105,7 @@ const keepAlive = () => {
 const startServer = async () => {
   try {
     if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing from your .env file!");
+      throw new Error("MONGO_URI is missing from .env!");
     }
     
     await mongoose.connect(process.env.MONGO_URI);
@@ -125,7 +117,7 @@ const startServer = async () => {
       keepAlive(); 
     });
   } catch (err) {
-    console.error("❌ Database connection error:", err.message);
+    console.error("❌ Connection error:", err.message);
     process.exit(1);
   }
 };
