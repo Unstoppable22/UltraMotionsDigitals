@@ -42,13 +42,14 @@ export default function LaunchSection({ onClose, selectedLocation }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. AUTH CHECK
+    // 1. AUTH CHECK - Enhanced to catch "null" or "undefined" strings
     const token = localStorage.getItem("token");
-    if (!token) {
-      setErrorMessage("You must be logged in to book a campaign.");
+    
+    if (!token || token === "undefined" || token === "null") {
+      setErrorMessage("⚠️ Authentication required. Please login to continue.");
       setTimeout(() => {
         onClose();
-        navigate("/signup");
+        navigate("/signup"); // Or /login depending on your route
       }, 2000);
       return;
     }
@@ -73,16 +74,22 @@ export default function LaunchSection({ onClose, selectedLocation }) {
       await axios.post(`${API_BASE_URL}/api/bookings`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${token}`,
+          "Authorization": `Bearer ${token.trim()}`, // trim() prevents space issues
         },
         withCredentials: true,
       });
 
-      setSuccessMessage("✅ Booking successful! Redirecting...");
-      setTimeout(() => onClose(), 2000);
+      setSuccessMessage("✅ Booking successful! Your campaign is pending approval.");
+      setTimeout(() => onClose(), 2500);
     } catch (err) {
       console.error("Booking Error:", err);
-      setErrorMessage(err.response?.data?.message || "❌ Failed to submit booking. Check your connection.");
+      // If server returns 401, the token is invalid
+      if (err.response?.status === 401) {
+        setErrorMessage("❌ Session expired. Please login again.");
+        localStorage.removeItem("token"); // Clear bad token
+      } else {
+        setErrorMessage(err.response?.data?.message || "❌ Failed to submit booking.");
+      }
     } finally {
       setLoading(false);
     }
@@ -98,7 +105,7 @@ export default function LaunchSection({ onClose, selectedLocation }) {
         <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Launch Your Campaign</h2>
 
         {selectedLocation && (
-          <div className="mb-4">
+          <div className="mb-4 text-center">
             <h3 className="text-lg font-semibold mb-2">{selectedLocation.name}</h3>
             <img src={selectedLocation.image} alt="Location" className="rounded shadow mb-2 max-h-40 object-cover w-full" />
           </div>
@@ -124,14 +131,14 @@ export default function LaunchSection({ onClose, selectedLocation }) {
           </div>
 
           <div className="mb-4 text-xs text-gray-600">
-            <label className="inline-flex items-center">
+            <label className="inline-flex items-center cursor-pointer">
               <input type="checkbox" required className="mr-2" />
               I agree to the Advertising Guidelines.
             </label>
           </div>
 
-          {errorMessage && <p className="text-red-600 text-sm mb-2 text-center font-semibold">{errorMessage}</p>}
-          {successMessage && <p className="text-green-600 text-sm mb-2 text-center font-semibold">{successMessage}</p>}
+          {errorMessage && <p className="text-red-600 text-sm mb-2 text-center font-bold bg-red-50 p-2 rounded">{errorMessage}</p>}
+          {successMessage && <p className="text-green-600 text-sm mb-2 text-center font-bold bg-green-50 p-2 rounded">{successMessage}</p>}
 
           <button
             type="submit"
