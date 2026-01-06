@@ -9,15 +9,18 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("https://ultramotionsdigitals.onrender.com/api/auth/login", { email, password });
-      localStorage.setItem("userToken", res.data.token);
-      navigate("/user-dashboard");
-    } catch (err) {
-      setError("Invalid email or password");
-    }
-  };
+  e.preventDefault();
+  try {
+    const res = await axios.post("https://ultramotionsdigitals.onrender.com/api/auth/login", { email, password });
+    
+    // CHANGE THIS FROM userToken TO token
+    localStorage.setItem("token", res.data.token); 
+    
+    navigate("/user-dashboard");
+  } catch (err) {
+    setError("Invalid email or password");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">

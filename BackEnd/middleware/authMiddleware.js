@@ -1,30 +1,35 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js"; // This import is critical!
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+export const protect = async (req, res, next) => {
+  let token;
 
-export const protect = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      // 1. Get token from header
+      token = req.headers.authorization.split(" ")[1];
 
-    // 1. Check if header exists
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log("❌ Auth Middleware: No Bearer token found in headers");
-      return res.status(401).json({ message: "Access denied. Please login." });
+      // 2. Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecretkey");
+
+      // 3. CRITICAL STEP: Fetch the user from the DB
+      // We use 'await' to ensure we have the data before moving on
+      req.user = await User.findById(decoded.id).select("-password");
+
+      if (!req.user) {
+        console.log("❌ Auth Middleware: User not found in DB");
+        return res.status(401).json({ message: "Not authorized, user not found" });
+      }
+
+      next();
+    } catch (error) {
+      console.error("❌ Auth Middleware Error:", error.message);
+      res.status(401).json({ message: "Not authorized, token failed" });
     }
-
-    // 2. Extract token
-    const token = authHeader.split(" ")[1];
-
-    // 3. Verify token
-    const decoded = jwt.verify(token, JWT_SECRET);
-    
-    // 4. Attach user info to request
-    req.user = decoded; 
-    console.log("✅ Auth Middleware: Token verified for user ID:", decoded.id);
-    
-    next();
-  } catch (error) {
-    console.error("❌ Auth Middleware Error:", error.message);
-    return res.status(401).json({ message: "Invalid session. Please login again." });
+  } else {
+    res.status(401).json({ message: "Not authorized, no token" });
   }
 };

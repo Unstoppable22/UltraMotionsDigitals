@@ -4,68 +4,84 @@ import { sendWhatsApp } from "../utils/sendWhatsApp.js";
 
 const bookingSchema = new mongoose.Schema(
   {
-    billboardId: { type: String, required: true, trim: true },
-    billboardTitle: { type: String, required: true, trim: true },
-    userId: { type: String, required: true, trim: true },
-    userName: { type: String, required: true, trim: true },
-    userEmail: { type: String, required: true, trim: true },
-    userPhone: { type: String, trim: true }, // For WhatsApp
-    startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
-    mediaUrl: { type: String, trim: true },
-    agreed: { type: Boolean, default: false },
-    status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    billboardId: { 
+      type: String, 
+      required: true, 
+      trim: true 
+    },
+    billboardTitle: { 
+      type: String, 
+      required: true, 
+      trim: true 
+    },
+    userId: { 
+      type: String, 
+      required: true, 
+      trim: true 
+    },
+    userName: { 
+      type: String, 
+      required: true, 
+      trim: true 
+    },
+    userEmail: { 
+      type: String, 
+      required: true, 
+      trim: true 
+    },
+    userPhone: { 
+      type: String, 
+      trim: true 
+    }, 
+    startDate: { 
+      type: Date, 
+      required: true 
+    },
+    endDate: { 
+      type: Date, 
+      required: true 
+    },
+    mediaUrl: { 
+      type: String, 
+      trim: true 
+    },
+    agreed: { 
+      type: Boolean, 
+      default: true 
+    },
+    status: { 
+      type: String, 
+      enum: ["pending", "approved", "rejected"], 
+      default: "pending" 
+    },
   },
   { timestamps: true }
 );
 
-// Notify admin when new booking is created
+// --- NOTIFICATIONS ---
+
+// This hook runs AFTER the booking is successfully saved to the database
 bookingSchema.post("save", async function (doc) {
-  const approveLink = `${process.env.FRONTEND_URL}/api/admin/bookings/${doc._id}/update-status?status=approved`;
-  const rejectLink = `${process.env.FRONTEND_URL}/api/admin/bookings/${doc._id}/update-status?status=rejected`;
-
-  await sendEmail({
-    to: process.env.ADMIN_EMAIL,
-    subject: "New Booking Received",
-    text: `New booking by ${doc.userName} for "${doc.billboardTitle}".
-Approve: ${approveLink}
-Reject: ${rejectLink}`
-  });
-
-  await sendWhatsApp({
-    to: process.env.ADMIN_WHATSAPP,
-    message: `New booking by ${doc.userName} for "${doc.billboardTitle}".
-Approve: ${approveLink}
-Reject: ${rejectLink}`
-  });
-});
-
-// Notify user after status change
-bookingSchema.post("findOneAndUpdate", async function (doc) {
-  if (!doc) return;
-
-  if (doc.status === "approved") {
+  const approveLink = `${process.env.FRONTEND_URL}/admin/dashboard`; 
+  
+  try {
+    // 1. Send Email to Admin
     await sendEmail({
-      to: doc.userEmail,
-      subject: "Booking Approved ✅",
-      text: `Hello ${doc.userName}, your booking for "${doc.billboardTitle}" has been approved.`
+      to: process.env.ADMIN_EMAIL,
+      subject: "📢 New Booking Received - Ultra Motion",
+      text: `New booking by ${doc.userName} for "${doc.billboardTitle}".\n\nView details in the dashboard: ${approveLink}`
     });
 
-    await sendWhatsApp({
-      to: doc.userPhone,
-      message: `Hello ${doc.userName}, your booking for "${doc.billboardTitle}" has been approved.`
-    });
-  } else if (doc.status === "rejected") {
-    await sendEmail({
-      to: doc.userEmail,
-      subject: "Booking Rejected ❌",
-      text: `Hello ${doc.userName}, unfortunately your booking for "${doc.billboardTitle}" has been rejected.`
-    });
-
-    await sendWhatsApp({
-      to: doc.userPhone,
-      message: `Hello ${doc.userName}, unfortunately your booking for "${doc.billboardTitle}" has been rejected.`
-    });
+    // 2. Send WhatsApp to Admin
+    if (process.env.ADMIN_WHATSAPP) {
+      await sendWhatsApp({
+        to: process.env.ADMIN_WHATSAPP,
+        message: `📢 *New Booking Received*\n\n*Client:* ${doc.userName}\n*Billboard:* ${doc.billboardTitle}\n*Dates:* ${doc.startDate.toDateString()} to ${doc.endDate.toDateString()}`
+      });
+    }
+  } catch (err) {
+    // We log the error but don't crash the app if notification fails
+    console.error("❌ Post-Save Notification Error:", err.message);
   }
 });
 

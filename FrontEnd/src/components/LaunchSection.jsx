@@ -17,10 +17,9 @@ export default function LaunchSection({ onClose, selectedLocation }) {
   const handleMediaUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     const maxSizeMB = 2;
     if (file.size > maxSizeMB * 1024 * 1024) {
-      setMediaError("File too large. Please upload media under 2MB.");
+      setMediaError("File too large. Max 2MB.");
       setMedia(null);
       return;
     }
@@ -36,26 +35,27 @@ export default function LaunchSection({ onClose, selectedLocation }) {
     } else if (media.type.startsWith("image/")) {
       return <img src={fileUrl} alt="Preview" className="w-full max-h-48 rounded shadow object-cover my-2" />;
     }
-    return <p className="text-sm text-red-500">Unsupported file type.</p>;
+    return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 1. AUTH CHECK - Enhanced to catch "null" or "undefined" strings
+    // 1. Get token from storage
     const token = localStorage.getItem("token");
-    
+
+    // Auth check logic
     if (!token || token === "undefined" || token === "null") {
-      setErrorMessage("⚠️ Authentication required. Please login to continue.");
+      setErrorMessage("⚠️ Please login to book a campaign.");
       setTimeout(() => {
         onClose();
-        navigate("/signup"); // Or /login depending on your route
+        navigate("/login"); 
       }, 2000);
       return;
     }
 
     if (!startDate || !endDate) {
-      setErrorMessage("Please select start and end dates.");
+      setErrorMessage("Please select dates.");
       return;
     }
 
@@ -65,35 +65,34 @@ export default function LaunchSection({ onClose, selectedLocation }) {
 
     try {
       const formData = new FormData();
-      formData.append("billboardTitle", selectedLocation?.name || "Unnamed Billboard");
+      formData.append("billboardTitle", selectedLocation?.name || "Unnamed");
       formData.append("startDate", startDate);
       formData.append("endDate", endDate);
       if (media) formData.append("media", media);
 
-      // 2. PROTECTED API CALL
+      // 2. SENDING TO BACKEND
       await axios.post(`${API_BASE_URL}/api/bookings`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${token.trim()}`, // trim() prevents space issues
+          "Authorization": `Bearer ${token}`,
         },
         withCredentials: true,
       });
 
-      setSuccessMessage("✅ Booking successful! Your campaign is pending approval.");
-      setTimeout(() => onClose(), 2500);
+      setSuccessMessage("✅ Booking successful!");
+      setTimeout(() => onClose(), 2000);
     } catch (err) {
       console.error("Booking Error:", err);
-      // If server returns 401, the token is invalid
       if (err.response?.status === 401) {
         setErrorMessage("❌ Session expired. Please login again.");
-        localStorage.removeItem("token"); // Clear bad token
+        localStorage.removeItem("token"); 
       } else {
-        setErrorMessage(err.response?.data?.message || "❌ Failed to submit booking.");
+        setErrorMessage(err.response?.data?.message || "❌ Submission failed.");
       }
     } finally {
       setLoading(false);
     }
-  };
+  }; // <--- Function properly closed here now
 
   const modalContent = (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] px-4">
@@ -102,12 +101,12 @@ export default function LaunchSection({ onClose, selectedLocation }) {
           &times;
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Launch Your Campaign</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">Launch Campaign</h2>
 
         {selectedLocation && (
           <div className="mb-4 text-center">
             <h3 className="text-lg font-semibold mb-2">{selectedLocation.name}</h3>
-            <img src={selectedLocation.image} alt="Location" className="rounded shadow mb-2 max-h-40 object-cover w-full" />
+            <img src={selectedLocation.image} alt="billboard" className="rounded shadow max-h-40 w-full object-cover my-2" />
           </div>
         )}
 
@@ -124,9 +123,9 @@ export default function LaunchSection({ onClose, selectedLocation }) {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Upload Media (Max: 2MB)</label>
-            <input type="file" accept="image/*,video/*" onChange={handleMediaUpload} className="w-full border rounded px-3 py-2 text-black bg-white" />
-            {mediaError && <p className="text-xs text-red-500 mt-1">{mediaError}</p>}
+            <label className="block text-sm font-medium text-gray-700 mb-1">Media (Max 2MB)</label>
+            <input type="file" accept="image/*,video/*" onChange={handleMediaUpload} className="w-full border rounded px-3 py-2 bg-white text-black" />
+            {mediaError && <p className="text-red-500 text-xs mt-1">{mediaError}</p>}
             {getMediaPreview()}
           </div>
 
@@ -145,7 +144,7 @@ export default function LaunchSection({ onClose, selectedLocation }) {
             disabled={loading}
             className="w-full bg-gray-900 text-white py-3 rounded font-bold hover:bg-black transition duration-200 disabled:opacity-50"
           >
-            {loading ? "Processing..." : "BOOK NOW"}
+            {loading ? "Submitting..." : "BOOK NOW"}
           </button>
         </form>
       </div>
