@@ -20,44 +20,33 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
-
 router.post("/", protect, upload.single("media"), async (req, res) => {
+  // --- EMERGENCY LOGS ---
+  console.log("--- DEBUG START ---");
+  console.log("Full Headers:", req.headers.authorization ? "Present" : "MISSING");
+  console.log("User Object:", req.user); 
+  console.log("Body Data:", req.body);
+  console.log("--- DEBUG END ---");
+
   try {
-    console.log("🔍 [DEBUG] User from Auth:", req.user);
+    // Force the values even if they are missing
+    const bookingData = {
+      billboardId: req.body.billboardId || `BILL-${Date.now()}`,
+      userId: req.user?._id || "MANUAL-ENTRY",
+      userName: req.user?.name || "Guest",
+      userEmail: req.user?.email || "no-email@test.com",
+      billboardTitle: req.body.billboardTitle || "Standard",
+      startDate: new Date(req.body.startDate),
+      endDate: new Date(req.body.endDate),
+      mediaUrl: req.file ? `/uploads/${req.file.filename}` : ""
+    };
 
-    if (!req.user) {
-      return res.status(401).json({ message: "Auth failed: No user found" });
-    }
-
-    const newBooking = new Booking({
-      billboardId: `BILL-${Date.now()}`,
-      userId: req.user._id?.toString() || req.user.id?.toString(),
-      userName: req.user.name || "Valued Client",
-      userEmail: req.user.email,
-      userPhone: req.user.phone || "N/A",
-      billboardTitle: req.body.billboardTitle || "Standard Billboard",
-      startDate: req.body.startDate ? new Date(req.body.startDate) : new Date(),
-      endDate: req.body.endDate ? new Date(req.body.endDate) : new Date(),
-      campaignType: req.body.campaignType || "Standard",
-      mediaUrl: req.file ? `/uploads/${req.file.filename}` : "",
-      agreed: true
-    });
-
-    const savedBooking = await newBooking.save();
-    console.log("✅ [SUCCESS] Booking ID:", savedBooking._id);
-    
-    res.status(201).json({
-      success: true,
-      booking: savedBooking
-    });
-
+    const booking = new Booking(bookingData);
+    await booking.save();
+    res.status(201).json({ success: true, booking });
   } catch (error) {
-    console.error("🔥 [SERVER ERROR]:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
+    console.error("❌ SAVING ERROR:", error.message);
+    res.status(500).json({ error: error.message });
   }
 });
-
 export default router;

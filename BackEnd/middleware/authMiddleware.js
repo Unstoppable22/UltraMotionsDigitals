@@ -13,7 +13,7 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       // 2. Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecretkey");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "supersecretkey22");
 
       // 3. CRITICAL STEP: Fetch the user from the DB
       // We use 'await' to ensure we have the data before moving on
