@@ -71,10 +71,10 @@ const startServer = async () => {
             throw new Error("MONGO_URI is missing from Environment Variables!");
         }
 
-        await mongoose.connect(mongoURI, {
-            serverSelectionTimeoutMS: 5000, // Fail after 5 seconds instead of 10
-            socketTimeoutMS: 45000,        // Close sockets after 45 seconds
-        });
+await mongoose.connect(mongoURI, {
+    serverSelectionTimeoutMS: 5000, 
+    bufferCommands: false, 
+});
 
         console.log("✅ MongoDB Connected Successfully");
 

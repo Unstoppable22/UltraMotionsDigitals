@@ -14,42 +14,48 @@ const generateToken = (id) => {
   );
 };
 
-// @desc    Register a new user
-// @route   POST /api/auth/signup
+
 export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    // 1. Destructure the NEW fields from req.body
+    const { firstName, lastName, email, password, phone } = req.body;
 
-    // 1. Check if user already exists
+    // 2. Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already registered with this email" });
     }
 
-    // 2. Hash the password (Security step)
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // 3. Create the user in MongoDB
+    // NOTE: We do NOT hash the password here because your User.js 
+    // model has the .pre("save") hook that hashes it automatically!
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
-      password: hashedPassword,
+      password, // Pass plain text, Model will hash it
+      phone,
     });
 
-    // 4. Send back the user data and the token
+    // 4. Send back success response
     res.status(201).json({
       success: true,
       token: generateToken(user._id),
       user: {
         id: user._id,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
       },
     });
   } catch (error) {
     console.error("🔥 Signup Error:", error.message);
-    res.status(500).json({ message: "Server error during signup", error: error.message });
+    // This sends the specific error message back to the frontend 
+    // so you can see if it's a validation error or a connection error.
+    res.status(500).json({ 
+      message: "Server error during signup", 
+      error: error.message 
+    });
   }
 };
 
