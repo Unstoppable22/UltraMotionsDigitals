@@ -28,22 +28,22 @@ export const signup = async (req, res) => {
 
     const { firstName, lastName, name, email, password, phone } = req.body;
 
-// 🔥 Handle both formats
-let fName = firstName;
-let lName = lastName;
+let fName = firstName?.trim();
+let lName = lastName?.trim();
 
-if (!firstName && name) {
-  const parts = name.split(" ");
-  fName = parts[0];
-  lName = parts.slice(1).join(" ") || "";
+if (!fName && name) {
+  const parts = name.trim().split(" ");
+  fName = parts[0] || "";
+  lName = parts.slice(1).join(" ") || "User";
 }
 
-// ✅ Validation
-if (!fName || !email || !password) {
+// Validate fields
+if (!fName || !email?.trim() || !password?.trim()) {
   return res.status(400).json({
     message: "All required fields must be filled",
   });
 }
+
 
     // ✅ 2. Normalize email
     const normalizedEmail = email.toLowerCase().trim();
@@ -57,10 +57,10 @@ if (!fName || !email || !password) {
     }
 
     // ✅ 4. Create user
-    const user = await User.create({
+   const user = await User.create({
   firstName: fName,
   lastName: lName,
-  email,
+  email: email.toLowerCase().trim(),
   password,
   phone,
 });
