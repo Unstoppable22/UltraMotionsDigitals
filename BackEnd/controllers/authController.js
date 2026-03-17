@@ -26,45 +26,35 @@ export const signup = async (req, res) => {
 
     console.log("📥 Incoming signup data:", req.body); // 🔥 DEBUG
 
-    const { firstName, lastName, name, email, password, phone } = req.body;
+   const { firstName, lastName, email, password, phone } = req.body;
 
-let fName = firstName?.trim();
-let lName = lastName?.trim();
-
-if (!fName && name) {
-  const parts = name.trim().split(" ");
-  fName = parts[0] || "";
-  lName = parts.slice(1).join(" ") || "User";
-}
-console.log("📝 fName, lName, email, password:", fName, lName, email, password);
-// Validate fields
-if (!fName || !email?.trim() || !password?.trim()) {
-  return res.status(400).json({
-    message: "All required fields must be filled",
-  });
+if (!firstName || !lastName || !email || !password) {
+  return res.status(400).json({ message: "All required fields must be filled" });
 }
 
+const userExists = await User.findOne({ email: email.toLowerCase().trim() });
+if (userExists) {
+  return res.status(400).json({ message: "User already registered with this email" });
+}
 
-    // ✅ 2. Normalize email
-    const normalizedEmail = email.toLowerCase().trim();
-
-    // ✅ 3. Check if user exists
-    const userExists = await User.findOne({ email: normalizedEmail });
-    if (userExists) {
-      return res.status(400).json({
-        message: "User already registered with this email",
-      });
-    }
-
-    // ✅ 4. Create user
-   const user = await User.create({
-  firstName: fName,
-  lastName: lName,
+const user = await User.create({
+  firstName: firstName.trim(),
+  lastName: lastName.trim(),
   email: email.toLowerCase().trim(),
   password,
   phone,
 });
 
+res.status(201).json({
+  success: true,
+  token: generateToken(user._id),
+  user: {
+    id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+  },
+});
     // ✅ 5. Success response
     res.status(201).json({
       success: true,
