@@ -31,33 +31,48 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ------------------------------
-// SIGNUP (Already good)
-// ------------------------------
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    console.log("BODY:", req.body);
+
+    const { firstName, lastName, email, password, role } = req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
-      password: hashedPassword,
+      password, // ✅ DON'T hash here (explained below)
       role: role || "user",
     });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
     res.status(201).json({
       message: "User registered successfully",
       token,
-      user: { id: user._id, name, email, role: user.role },
+      user: {
+        id: user._id,
+        name: user.name,
+        email,
+        role: user.role,
+      },
     });
+
   } catch (error) {
+    console.error("SIGNUP ERROR:", error);
     res.status(500).json({ message: "Signup failed", error: error.message });
   }
 });
