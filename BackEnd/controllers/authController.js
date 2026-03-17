@@ -23,16 +23,27 @@ const generateToken = (id) => {
  */
 export const signup = async (req, res) => {
   try {
+
     console.log("📥 Incoming signup data:", req.body); // 🔥 DEBUG
 
-    const { firstName, lastName, email, password, phone } = req.body;
+    const { firstName, lastName, name, email, password, phone } = req.body;
 
-    // ✅ 1. Validate inputs (PREVENTS 500 ERRORS)
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({
-        message: "All required fields must be filled",
-      });
-    }
+// 🔥 Handle both formats
+let fName = firstName;
+let lName = lastName;
+
+if (!firstName && name) {
+  const parts = name.split(" ");
+  fName = parts[0];
+  lName = parts.slice(1).join(" ") || "";
+}
+
+// ✅ Validation
+if (!fName || !email || !password) {
+  return res.status(400).json({
+    message: "All required fields must be filled",
+  });
+}
 
     // ✅ 2. Normalize email
     const normalizedEmail = email.toLowerCase().trim();
@@ -47,12 +58,12 @@ export const signup = async (req, res) => {
 
     // ✅ 4. Create user
     const user = await User.create({
-      firstName,
-      lastName,
-      email: normalizedEmail,
-      password, // hashed in model
-      phone,
-    });
+  firstName: fName,
+  lastName: lName,
+  email,
+  password,
+  phone,
+});
 
     // ✅ 5. Success response
     res.status(201).json({
