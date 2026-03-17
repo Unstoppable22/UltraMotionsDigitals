@@ -36,7 +36,7 @@ if (!fName && name) {
   fName = parts[0] || "";
   lName = parts.slice(1).join(" ") || "User";
 }
-
+console.log("📝 fName, lName, email, password:", fName, lName, email, password);
 // Validate fields
 if (!fName || !email?.trim() || !password?.trim()) {
   return res.status(400).json({
