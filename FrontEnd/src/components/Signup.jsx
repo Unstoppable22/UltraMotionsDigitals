@@ -23,13 +23,10 @@ export default function Signup() {
       console.log("📤 Sending signup request:", requestBody);
 
       const response = await axios.post(
-        "https://ultramotionsdigitals.onrender.com/api/auth/signup",
-        requestBody,
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true,
-        }
-      );
+  "https://ultramotionsdigitals.onrender.com/api/auth/signup",
+  { firstName, lastName, email, password },
+  { headers: { "Content-Type": "application/json" } }
+);
 
       console.log("✅ Signup successful:", response.data);
       navigate("/login");
@@ -59,23 +56,21 @@ export default function Signup() {
           </div>
         )}
 
-        <input
-          type="text"
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          required
-          className="w-full p-3 mb-3 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500"
-        />
+<input 
+  type="text"
+  placeholder="First Name"
+  value={firstName}
+  onChange={(e) => setFirstName(e.target.value)}
+  required
+/>
 
-        <input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          required
-          className="w-full p-3 mb-3 rounded-md bg-gray-700 text-white focus:ring-2 focus:ring-blue-500"
-        />
+<input 
+  type="text"
+  placeholder="Last Name"
+  value={lastName}
+  onChange={(e) => setLastName(e.target.value)}
+  required
+/>
 
         <input
           type="email"
