@@ -3,7 +3,7 @@ import LaunchSection from "./Launchsection";
 import CategorySection from "./categorysection";
 import Listing from "./Listing";
 
-export default function CategorySectionGroup() {
+export default function Categoryectiongroup() {
   const [showModal, setShowModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
