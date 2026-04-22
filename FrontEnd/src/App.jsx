@@ -20,7 +20,7 @@ import Signup from "./components/Signup";
 import Login from "./components/Login";
 
 // Admin Pages - DOUBLE CHECK THESE PATHS FOR CASE SENSITIVITY
-import Adminlogin from "./pages/admin/AdminLugeen.jsx";
+import Adminlogin from "./pages/admin/Adminlogeen.jsx";
 import Admindashboard from "./pages/admin/Admindashboard.jsx";
 
 // Route Protection
