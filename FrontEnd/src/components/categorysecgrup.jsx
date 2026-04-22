@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useCallback } from "react";
-import LaunchSection from "./Launchsection";
+import LaunchSection from "./Launchsections";
 import CategorySection from "./categorysection";
 import Listing from "./Listing";
 
-export default function Categoryectiongroup() {
+export default function Categorysectiongroup() {
   const [showModal, setShowModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
