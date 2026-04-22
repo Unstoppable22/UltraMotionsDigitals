@@ -21,7 +21,7 @@ import Login from "./components/Login";
 
 // Admin Pages - DOUBLE CHECK THESE PATHS FOR CASE SENSITIVITY
 import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 
 // Route Protection
 import ProtectedRoute from "./components/ProtectedRoute";
