@@ -21,8 +21,10 @@ if (!fs.existsSync(dir)) {
 const allowedOrigins = [
     "https://ultramotiondigitals.com",
     "https://www.ultramotiondigitals.com",
+    "https://ultramotionsdigitals.onrender.com",
     "https://ultra-motions-digitals-99fx.vercel.app",
     "http://localhost:5173"
+    "http://localhost:3000"
 ];
 
 app.use(cors({
