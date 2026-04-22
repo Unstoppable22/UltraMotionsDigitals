@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 // FIXED: Added "export default function" and fixed the bracket syntax
-export default function AdminDashboard({ 
+export default function Admindashboard({ 
   users = [], 
   bookings = [], 
   API_BASE_URL = "", 
