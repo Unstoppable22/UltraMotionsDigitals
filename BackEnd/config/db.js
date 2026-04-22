@@ -1,25 +1,17 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+import mongoose from "mongoose";
 
-const client = new MongoClient(process.env.MONGODB_URI, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
-
-let db;
-
-async function connectDB() {
+const connectDB = async () => {
   try {
-    await client.connect();
-    db = client.db("UltraMotionDigitals");
-    console.log("✅ MongoDB Connected Successfully");
-    return db;
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      serverSelectionTimeoutMS: 5000, 
+    });
+
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error("❌ MongoDB connection failed:", error);
+    console.error("❌ MongoDB connection failed:", error.message);
     process.exit(1);
   }
-}
+};
 
-module.exports = { connectDB, client };
+// Exporting as the "default" makes it easier to use in index.js
+export default connectDB;
