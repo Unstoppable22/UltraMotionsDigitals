@@ -1,5 +1,5 @@
 import React from "react";
-import TestimonialCard from "./TestimonialCard";
+import TestimonialCard from "./Testimonialcard";
 
 export default function Testimonials() {
   return (

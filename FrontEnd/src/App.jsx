@@ -8,13 +8,13 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Faq from "./components/Faq";
 import AboutUs from "./pages/AboutUs";
-import CategorySectionGroup from "./components/CategorySectionGroup";
+import CategorySectionGroup from "./components/Categorysectiongroup.jsx";
 import Testimonials from "./components/Testimonials";
-import LaunchSection from "./components/LaunchSection";
+import LaunchSection from "./components/Launchsection.jsx";
 
 // User Pages
 import Dashboard from "./components/Dashboard";
-import UserDashboard from "./pages/UserDashboard";
+import UserDashboard from "./pages/Userdashboard.jsx";
 import Profile from "./components/Profile";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
@@ -24,7 +24,7 @@ import AdminLogin from "./pages/admin/Adminlogin.jsx";
 import AdminDashboard from "./pages/admin/Admindashboard.jsx";
 
 // Route Protection
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/Protectedroute.jsx";
 
 export default function App() {
   const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
