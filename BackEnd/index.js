@@ -67,21 +67,22 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
     try {
         const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
-        if (!mongoURI) throw new Error("MONGO_URI is missing!");
-
-        // Remove bufferCommands: false (Letting it buffer is actually safer here)
-        await mongoose.connect(mongoURI, {
-            serverSelectionTimeoutMS: 10000, 
-        });
-
+        
+        // 1. Connect to Database FIRST
+        console.log("⏳ Connecting to MongoDB...");
+        await mongoose.connect(mongoURI); 
         console.log("✅ MongoDB Connected Successfully");
 
+        // 2. Start Express ONLY AFTER database is connected
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => {
             console.log(`🚀 Server running on port ${PORT}`);
         });
+
     } catch (err) {
         console.error("❌ Database Connection Error:", err.message);
+        // Important: If DB fails, we want the server to stop so we can see why
+        process.exit(1); 
     }
 };
 
