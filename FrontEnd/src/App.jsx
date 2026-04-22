@@ -8,7 +8,7 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Faq from "./components/Faq";
 import Aboutus from "./pages/aboutus.jsx";
-import Categorysectiongroup from "./components/categorysectiongroup.jsx";
+import Categorysectiongroup from "./components/ongoing.jsx";
 import Testimonials from "./components/Testimonials";
 import Launchsection from "./components/Launchsection.jsx";
 
