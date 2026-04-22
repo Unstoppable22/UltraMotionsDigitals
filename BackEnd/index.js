@@ -66,19 +66,12 @@ app.use((err, req, res, next) => {
 // 6. Database Connection & Server Start
 const startServer = async () => {
     try {
-        // Use the exact key you have in Render
-        const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI; 
-        
-        if (!mongoURI) {
-            console.error("❌ ERROR: MONGO_URI is missing from Environment Variables!");
-            return; // Stop here if no URI
-        }
+        const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+        if (!mongoURI) throw new Error("MONGO_URI is missing!");
 
-        console.log("⏳ Attempting to connect to MongoDB...");
-
+        // Remove bufferCommands: false (Letting it buffer is actually safer here)
         await mongoose.connect(mongoURI, {
-            serverSelectionTimeoutMS: 10000, // Increased to 10 seconds
-            // Removed bufferCommands: false to allow Mongoose to wait for the connection
+            serverSelectionTimeoutMS: 10000, 
         });
 
         console.log("✅ MongoDB Connected Successfully");
@@ -89,7 +82,6 @@ const startServer = async () => {
         });
     } catch (err) {
         console.error("❌ Database Connection Error:", err.message);
-        // On Render, we don't exit, we let it retry
     }
 };
 
