@@ -68,21 +68,23 @@ const startServer = async () => {
     try {
         const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
         
-        // 1. Connect to Database FIRST
-        console.log("⏳ Connecting to MongoDB...");
-        await mongoose.connect(mongoURI); 
+        // This MUST happen first
+        console.log("⏳ Attempting to wake up MongoDB...");
+        await mongoose.connect(mongoURI, {
+            serverSelectionTimeoutMS: 15000, // Give it more time (15s)
+        });
+        
         console.log("✅ MongoDB Connected Successfully");
 
-        // 2. Start Express ONLY AFTER database is connected
+        // ONLY start the express server after the DB is 100% ready
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`🚀 Ultra Motions API running on port ${PORT}`);
         });
 
     } catch (err) {
-        console.error("❌ Database Connection Error:", err.message);
-        // Important: If DB fails, we want the server to stop so we can see why
-        process.exit(1); 
+        console.error("❌ DB CONNECTION FAILED:", err.message);
+        process.exit(1);
     }
 };
 
