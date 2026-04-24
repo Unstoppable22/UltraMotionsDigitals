@@ -17,14 +17,13 @@ if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
 }
 
-// 2. Optimized CORS Configuration
 const allowedOrigins = [
     "https://ultramotiondigitals.com",
     "https://www.ultramotiondigitals.com",
     "https://ultramotionsdigitals.onrender.com",
     "https://ultra-motions-digitals-99fx.vercel.app",
-    "http://localhost:5173"
-    "http://localhost:3000"
+    "http://localhost:5173", 
+    "http://localhost:3000"  
 ];
 
 app.use(cors({
