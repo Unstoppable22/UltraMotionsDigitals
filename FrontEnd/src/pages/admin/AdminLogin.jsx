@@ -16,44 +16,62 @@ export default function AdminLogin() {
 
     try {
       const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/admin/login`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/auth/login`, // FIXED: Matches your Backend
         { email, password }
       );
 
-      localStorage.setItem("adminToken", res.data.token);
-      navigate("/admin/dashboard");
+      if (res.data.success) {
+        // FIXED: Using "token" to match Protectedroute.jsx
+        localStorage.setItem("token", res.data.token);
+        
+        // FIXED: Saving user object so the system knows you are an "admin"
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+
+        // Redirect to the correct path from your App.jsx
+        window.location.href = "/AdminDashboard"; 
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.response?.data?.message || "Login failed. Ensure you are an admin.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Admin Login</h2>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
+      <div className="bg-gray-800 p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-700">
+        <h2 className="text-3xl font-bold mb-6 text-center text-white">Admin Portal</h2>
+        
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 text-red-400 p-2 rounded mb-4 text-center text-sm">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Admin Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border p-2 mb-4"
+            className="w-full bg-gray-700 border-none text-white p-3 mb-4 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            required
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border p-2 mb-6"
+            className="w-full bg-gray-700 border-none text-white p-3 mb-6 rounded-md focus:ring-2 focus:ring-blue-500 outline-none"
+            required
           />
           <button
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded"
+            className={`w-full py-3 rounded-md font-bold text-white transition ${
+              loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-900/20"
+            }`}
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Authenticating..." : "Enter Dashboard"}
           </button>
         </form>
       </div>
