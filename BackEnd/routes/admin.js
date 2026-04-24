@@ -58,37 +58,30 @@ router.get("/users", async (req, res) => {
  * GET ALL BOOKINGS
  * GET /api/admin/bookings
  */
+/* ================= BOOKINGS ================= */
+
+// GET all bookings
 router.get("/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
     res.json(bookings);
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: "Server error" });
   }
 });
 
-/**
- * UPDATE BOOKING STATUS (approve/reject)
- * POST /api/admin/bookings/:id/:status
- */
-router.post("/bookings/:id/:status", async (req, res) => {
-  const { id, status } = req.params;
-  if (!["approved", "rejected"].includes(status))
-    return res.status(400).json({ message: "Invalid status" });
-
+// ✅ UNIVERSAL UPDATE ROUTE (Replaces the specific approve/reject ones)
+router.put("/bookings/:id", async (req, res) => {
   try {
+    const { status } = req.body; // Gets "approved" or "rejected" from frontend
     const booking = await Booking.findByIdAndUpdate(
-      id,
+      req.params.id,
       { status },
       { new: true }
     );
-
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
-
-    res.json({ success: true, booking });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.json(booking);
+  } catch {
+    res.status(500).json({ message: "Status update failed" });
   }
 });
 

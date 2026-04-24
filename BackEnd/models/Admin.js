@@ -1,84 +1,104 @@
 import express from "express";
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
+// Optional: Import your protect/admin middleware if you have one
+// import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+/**
+ * NOTE: If you have admin middleware, apply it to all routes here:
+ * router.use(protect);
+ * router.use(admin);
+ */
+
 /* ================= USERS ================= */
 
-// GET all users
+// @desc    Get all users (excluding passwords)
+// @route   GET /api/admin/users
 router.get("/users", async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
     res.json(users);
-  } catch {
-    res.status(500).json({ message: "Server error" });
+  } catch (error) {
+    console.error("GET USERS ERROR:", error.message);
+    res.status(500).json({ message: "Failed to fetch users" });
   }
 });
 
-// UPDATE user
+// @desc    Update user details
+// @route   PUT /api/admin/users/:id
 router.put("/users/:id", async (req, res) => {
   try {
     const { name, email } = req.body;
+    
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { name, email },
-      { new: true }
+      { new: true, runValidators: true }
     ).select("-password");
 
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
     res.json(user);
-  } catch {
+  } catch (error) {
+    console.error("UPDATE USER ERROR:", error.message);
     res.status(500).json({ message: "Update failed" });
   }
 });
 
-// DELETE user
+// @desc    Delete user
+// @route   DELETE /api/admin/users/:id
 router.delete("/users/:id", async (req, res) => {
   try {
-    await User.findByIdAndDelete(req.params.id);
-    res.json({ message: "User deleted" });
-  } catch {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("DELETE USER ERROR:", error.message);
     res.status(500).json({ message: "Delete failed" });
   }
 });
 
 /* ================= BOOKINGS ================= */
 
-// GET all bookings
+// @desc    Get all bookings with newest first
+// @route   GET /api/admin/bookings
 router.get("/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
     res.json(bookings);
-  } catch {
-    res.status(500).json({ message: "Server error" });
+  } catch (error) {
+    console.error("GET BOOKINGS ERROR:", error.message);
+    res.status(500).json({ message: "Server error fetching bookings" });
   }
 });
 
-// APPROVE booking
-router.post("/bookings/:id/approve", async (req, res) => {
+// @desc    Update booking status (Universal Route)
+// @route   PUT /api/admin/bookings/:id
+router.put("/bookings/:id", async (req, res) => {
   try {
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { status: "approved" },
-      { new: true }
-    );
-    res.json(booking);
-  } catch {
-    res.status(500).json({ message: "Approve failed" });
-  }
-});
+    const { status } = req.body;
 
-// REJECT booking
-router.post("/bookings/:id/reject", async (req, res) => {
-  try {
+    // Validation: Ensure status is valid
+    const validStatuses = ["pending", "approved", "rejected"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
-      { status: "rejected" },
+      { status },
       { new: true }
     );
+
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
+
     res.json(booking);
-  } catch {
-    res.status(500).json({ message: "Reject failed" });
+  } catch (error) {
+    console.error("UPDATE BOOKING ERROR:", error.message);
+    res.status(500).json({ message: "Status update failed" });
   }
 });
 
