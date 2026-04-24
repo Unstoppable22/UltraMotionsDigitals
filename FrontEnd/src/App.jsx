@@ -39,20 +39,16 @@ export default function App() {
           }
         />
 
-        {/* --- ADMIN ROUTES (Completely Separate, No Navbar) --- */}
-        <Route path="/AdminLogin" element={<AdminLogin />} />
-        <Route
-          path="/AdminDashboard"
-          element={
-            <Protectedroute adminOnly={true}>
-              <AdminDashboard 
-                users={[]} 
-                bookings={[]} 
-                API_BASE_URL={API_URL} 
-              />
-            </Protectedroute>
-          }
-        />
+        {/* --- ADMIN ROUTES --- */}
+<Route path="/AdminLogin" element={<AdminLogin />} />
+<Route
+  path="/AdminDashboard"
+  element={
+    <Protectedroute adminOnly={true}>
+      <AdminDashboard API_BASE_URL={API_URL} />
+    </Protectedroute>
+  }
+/>
       </Routes>
     </Router>
   );
