@@ -14,73 +14,87 @@ const router = express.Router();
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // 1. Check admin exists
     const admin = await Admin.findOne({ email });
     if (!admin) return res.status(401).json({ message: "Invalid credentials" });
 
-    // 2. Compare password
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-    // 3. Generate token
     const token = jwt.sign(
       { id: admin._id, email: admin.email },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.json({
-      success: true,
-      token,
-      admin: { id: admin._id, email: admin.email },
-    });
+    res.json({ success: true, token, admin: { id: admin._id, email: admin.email } });
   } catch (error) {
-    console.error("Admin login error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-/**
- * GET ALL USERS
- * GET /api/admin/users
- */
+/* ================= USER MANAGEMENT ================= */
+
+// GET all users
 router.get("/users", async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find().select("-password").sort({ createdAt: -1 });
     res.json(users);
   } catch (err) {
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error fetching users" });
   }
 });
 
-/**
- * GET ALL BOOKINGS
- * GET /api/admin/bookings
- */
-/* ================= BOOKINGS ================= */
+// UPDATE user details
+router.put("/users/:id", async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { name, email },
+      { new: true }
+    ).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Update failed" });
+  }
+});
+
+// DELETE user (THIS WAS MISSING)
+router.delete("/users/:id", async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ success: true, message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Delete failed" });
+  }
+});
+
+/* ================= BOOKING MANAGEMENT ================= */
 
 // GET all bookings
 router.get("/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
     res.json(bookings);
-  } catch {
-    res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error fetching bookings" });
   }
 });
 
-// ✅ UNIVERSAL UPDATE ROUTE (Replaces the specific approve/reject ones)
+// UPDATE booking status
 router.put("/bookings/:id", async (req, res) => {
   try {
-    const { status } = req.body; // Gets "approved" or "rejected" from frontend
+    const { status } = req.body;
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true }
     );
+    if (!booking) return res.status(404).json({ message: "Booking not found" });
     res.json(booking);
-  } catch {
+  } catch (err) {
     res.status(500).json({ message: "Status update failed" });
   }
 });
