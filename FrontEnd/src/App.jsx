@@ -37,28 +37,28 @@
           <Route path="/faq" element={<Faq />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/category" element={<CategorySectionGroup />} />
-          <Route path="/launch" element={<LaunchSection />} />
+          <Route path="/launch" element={<Launchsection />} />
           <Route path="/testimonials" element={<Testimonials />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
 
           {/* PROTECTED ROUTES */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/user-dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<Protectedroute><Dashboard /></Protectedroute>} />
+          <Route path="/user-dashboard" element={<Protectedroute><UserDashboard /></Protectedroute>} />
+          <Route path="/profile" element={<Protectedroute><Profile /></Protectedroute>} />
 
           {/* ADMIN ROUTES */}
           <Route path="/AdminLogin" element={<AdminLogin />} />
           <Route
             path="/AdminDashboard"
             element={
-              <ProtectedRoute adminOnly>
+              <Protectedroute adminOnly>
                 <AdminDashboard 
                   users={[]} 
                   bookings={[]} 
                   API_BASE_URL={API_URL} 
                 />
-              </ProtectedRoute>
+              </Protectedroute>
             }
           />
           <Route path="*" element={<h1 className="text-center mt-20 text-3xl">404 - Page Not Found</h1>} />
