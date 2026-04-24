@@ -30,11 +30,10 @@ export const signup = async (req, res) => {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: normalizedEmail,
-      password, // Password hashing should happen in your User Model pre-save hook
+      password, 
       phone,
     });
 
-    // ONLY ONE RESPONSE HERE
     return res.status(201).json({
       success: true,
       token: generateToken(user._id),
@@ -43,6 +42,7 @@ export const signup = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: user.role, // ✅ FIXED: Added role
       },
     });
 
@@ -78,6 +78,7 @@ export const login = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: user.role, // ✅ FIXED: Added role
       },
     });
 
