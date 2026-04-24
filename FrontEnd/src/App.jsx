@@ -7,10 +7,10 @@ import Footer from "./components/Footer";
 // Pages
 import Home from "./pages/Home";
 import Faq from "./components/Faq";
-import AboutUs from "./pages/AboutUs"; // Fixed U
-import CategorySectionGroup from "./components/CategorySectionGroup"; // Fixed Case
+import AboutUs from "./pages/AboutUs";
+import CategorySectionGroup from "./components/CategorySectionGroup";
 import Testimonials from "./components/Testimonials";
-import LaunchSection from "./components/LaunchSection"; // Fixed S
+import Launchsection from "./components/Launchsection";
 
 // User Pages
 import Dashboard from "./components/Dashboard";
@@ -24,7 +24,7 @@ import AdminLogin from "./pages/admin/AdminLogin"; // Ensure file is AdminLogin.
 import AdminDashboard from "./pages/admin/AdminDashboard"; // Ensure file is AdminDashboard.jsx
 
 // Route Protection
-import ProtectedRoute from "./components/ProtectedRoute"; // Fixed Case
+import Protectedroute from "./components/Protectedroute";
 
 export default function App() {
   const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";

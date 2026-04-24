@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
-import LaunchSection from "./Launchsections";
-import CategorySection from "./categorysection";
+import LaunchSection from "./Launchsection";
+import CategorySection from "./Categorysection";
 import Listing from "./Listing";
 
 export default function Categorysectiongroup() {
