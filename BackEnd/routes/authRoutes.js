@@ -8,7 +8,6 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-// Ensure uploads directory exists
 const uploadDir = "uploads/";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
@@ -24,15 +23,22 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// ------------------------------
-// AUTH ROUTES
-// ------------------------------
+// --- AUTH ROUTES ---
 router.post("/signup", signup);
 router.post("/login", login);
 
-// ------------------------------
-// PROTECTED ROUTES
-// ------------------------------
+// ✅ ADDED: GET USER PROFILE (This fixes your 404 error)
+router.get("/profile", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// --- PROFILE PHOTO UPLOAD ---
 router.post("/profile/photo", protect, upload.single("profilePhoto"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
