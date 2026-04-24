@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 
-// FIXED: Added "export default function" and fixed the bracket syntax
-export default function Admindashboard({ 
+export default function AdminDashboard({ 
   users = [], 
   bookings = [], 
   API_BASE_URL = "", 
-  handleEdit, 
   handleSave, 
-  handleCancel, 
   handleDeleteUser, 
   handleBookingStatus 
 }) {
@@ -17,144 +14,97 @@ export default function Admindashboard({
   const startEdit = (user) => {
     setEditingUserId(user._id);
     setEditForm({ name: user.name, email: user.email });
-    if (handleEdit) handleEdit(user);
   };
 
   return (
-    <div className="p-4">
-      {/* Users Table */}
-      <h2 className="text-2xl font-semibold mb-4">Users</h2>
-      <table className="w-full mb-10 border bg-white shadow-sm">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="p-2 border">Photo</th>
-            <th className="p-2 border">Name</th>
-            <th className="p-2 border">Email</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user._id} className="text-center">
-              <td className="p-2 border">
-                {user.profilePhoto ? (
-                  <img
-                    src={`${API_BASE_URL}/uploads/${user.profilePhoto}`}
-                    alt={user.name}
-                    className="w-10 h-10 rounded-full mx-auto"
-                  />
-                ) : (
-                  "—"
-                )}
-              </td>
-              <td className="p-2 border">
-                {editingUserId === user._id ? (
-                  <input
-                    value={editForm.name}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, name: e.target.value })
-                    }
-                    className="border p-1 rounded w-full"
-                  />
-                ) : (
-                  user.name
-                )}
-              </td>
-              <td className="p-2 border">
-                {editingUserId === user._id ? (
-                  <input
-                    value={editForm.email}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, email: e.target.value })
-                    }
-                    className="border p-1 rounded w-full"
-                  />
-                ) : (
-                  user.email
-                )}
-              </td>
-              <td className="p-2 border space-x-2">
-                {editingUserId === user._id ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        handleSave(user._id, editForm);
-                        setEditingUserId(null);
-                      }}
-                      className="bg-green-600 text-white px-2 py-1 rounded"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingUserId(null);
-                        setEditForm({ name: "", email: "" });
-                        if (handleCancel) handleCancel();
-                      }}
-                      className="bg-gray-600 text-white px-2 py-1 rounded"
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => startEdit(user)}
-                      className="bg-blue-600 text-white px-2 py-1 rounded"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteUser(user._id)}
-                      className="bg-red-600 text-white px-2 py-1 rounded"
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">Admin Management Portal</h1>
 
-      {/* Bookings Table */}
-      <h2 className="text-2xl font-semibold mb-4">Bookings</h2>
-      <table className="w-full border bg-white shadow-sm">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="p-2 border">User</th>
-            <th className="p-2 border">Date</th>
-            <th className="p-2 border">Status</th>
-            <th className="p-2 border">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bookings.map((b) => (
-            <tr key={b._id} className="text-center">
-              <td className="p-2 border">{b.userName || "N/A"}</td>
-              <td className="p-2 border">
-                {new Date(b.createdAt).toLocaleString()}
-              </td>
-              <td className="p-2 border uppercase text-xs font-bold">{b.status}</td>
-              <td className="p-2 border space-x-2">
-                <button
-                  onClick={() => handleBookingStatus(b._id, "approved")}
-                  className="bg-green-600 text-white px-2 py-1 rounded"
-                >
-                  Approve
-                </button>
-                <button
-                  onClick={() => handleBookingStatus(b._id, "rejected")}
-                  className="bg-red-600 text-white px-2 py-1 rounded"
-                >
-                  Reject
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        {/* Users Table */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-12">
+          <div className="bg-gray-800 px-6 py-4">
+            <h2 className="text-xl font-semibold text-white">Registered Users</h2>
+          </div>
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="p-4 font-semibold text-gray-600">Photo</th>
+                <th className="p-4 font-semibold text-gray-600">Name</th>
+                <th className="p-4 font-semibold text-gray-600">Email</th>
+                <th className="p-4 font-semibold text-gray-600 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id} className="border-b hover:bg-gray-50 transition">
+                  <td className="p-4 text-center">
+                    {user.profilePhoto ? (
+                      <img src={`${API_BASE_URL}/uploads/${user.profilePhoto}`} className="w-12 h-12 rounded-full object-cover shadow-sm" alt="User" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-gray-200 mx-auto flex items-center justify-center text-gray-500">?</div>
+                    )}
+                  </td>
+                  <td className="p-4">
+                    {editingUserId === user._id ? (
+                      <input value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="border rounded px-2 py-1 w-full" />
+                    ) : user.name}
+                  </td>
+                  <td className="p-4">
+                    {editingUserId === user._id ? (
+                      <input value={editForm.email} onChange={(e) => setEditForm({...editForm, email: e.target.value})} className="border rounded px-2 py-1 w-full" />
+                    ) : user.email}
+                  </td>
+                  <td className="p-4 text-center space-x-2">
+                    {editingUserId === user._id ? (
+                      <button onClick={() => { handleSave(user._id, editForm); setEditingUserId(null); }} className="bg-green-500 text-white px-3 py-1 rounded-md text-sm">Save</button>
+                    ) : (
+                      <>
+                        <button onClick={() => startEdit(user)} className="bg-blue-500 text-white px-3 py-1 rounded-md text-sm">Edit</button>
+                        <button onClick={() => handleDeleteUser(user._id)} className="bg-red-500 text-white px-3 py-1 rounded-md text-sm">Delete</button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Bookings Table */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-gray-800 px-6 py-4">
+            <h2 className="text-xl font-semibold text-white">Recent Billboard Bookings</h2>
+          </div>
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="p-4 font-semibold text-gray-600">User</th>
+                <th className="p-4 font-semibold text-gray-600">Date</th>
+                <th className="p-4 font-semibold text-gray-600">Status</th>
+                <th className="p-4 font-semibold text-gray-600 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((b) => (
+                <tr key={b._id} className="border-b hover:bg-gray-50 transition">
+                  <td className="p-4 font-medium text-gray-700">{b.userName || "Unknown"}</td>
+                  <td className="p-4 text-gray-600">{new Date(b.createdAt).toLocaleDateString()}</td>
+                  <td className="p-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${b.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {b.status}
+                    </span>
+                  </td>
+                  <td className="p-4 text-center space-x-2">
+                    <button onClick={() => handleBookingStatus(b._id, "approved")} className="bg-green-600 text-white px-3 py-1 rounded-md text-sm hover:bg-green-700">Approve</button>
+                    <button onClick={() => handleBookingStatus(b._id, "rejected")} className="bg-red-600 text-white px-3 py-1 rounded-md text-sm hover:bg-red-700">Reject</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
