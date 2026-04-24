@@ -11,7 +11,6 @@ import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const app = express();
 
-// 1. Directory Setup
 const dir = './uploads';
 if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
@@ -26,63 +25,52 @@ const allowedOrigins = [
     "http://localhost:3000"  
 ];
 
+// ✅ 1. Reusable CORS config
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) === -1) {
-            return callback(new Error('CORS policy violation'), false);
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('CORS policy violation'));
         }
-        return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// 3. Global Middleware
+// ✅ 2. Explicit Pre-flight fix
+app.options("*", cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
-// 4. Routes
 app.get("/", (req, res) => {
     res.send("✅ Ultra Motions Digitals Backend is running!");
 });
 
-// Register your Auth, Booking, and Admin routes
 app.use("/api/auth", authRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 
-// 5. Global Error Handler
 app.use((err, req, res, next) => {
-    console.error("🔥 Server Error Stack:", err.stack);
+    console.error("🔥 Server Error:", err.message);
     res.status(err.status || 500).json({ 
-        message: err.message || "Internal Server Error",
-        error: process.env.NODE_ENV === 'development' ? err : {} 
+        message: err.message || "Internal Server Error"
     });
 });
 
-// 6. Database Connection & Server Start
 const startServer = async () => {
     try {
         const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
-        
-        // This MUST happen first
-        console.log("⏳ Attempting to wake up MongoDB...");
-        await mongoose.connect(mongoURI, {
-            serverSelectionTimeoutMS: 15000, // Give it more time (15s)
-        });
-        
-        console.log("✅ MongoDB Connected Successfully");
+        await mongoose.connect(mongoURI);
+        console.log("✅ MongoDB Connected");
 
-        // ONLY start the express server after the DB is 100% ready
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => {
-            console.log(`🚀 Ultra Motions API running on port ${PORT}`);
+            console.log(`🚀 API running on port ${PORT}`);
         });
-
     } catch (err) {
         console.error("❌ DB CONNECTION FAILED:", err.message);
         process.exit(1);

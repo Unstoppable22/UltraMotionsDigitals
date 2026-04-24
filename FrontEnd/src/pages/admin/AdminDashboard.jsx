@@ -54,17 +54,28 @@ export default function AdminDashboard({ API_BASE_URL }) {
     }
   };
 
-  const handleDeleteUser = async (id) => {
+const handleDeleteUser = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
+    
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`${API_BASE_URL}/api/admin/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      
+      // Explicitly set headers for the DELETE method
+      const response = await axios.delete(`${API_BASE_URL}/api/admin/users/${id}`, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
       });
-      fetchData();
+
+      if (response.data.success || response.status === 200) {
+        fetchData(); // Refresh the list
+      }
     } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Failed to delete user.");
+
+      const errorMsg = err.response?.data?.message || err.message;
+      console.error("Delete failed details:", errorMsg);
+      alert(`Delete failed: ${errorMsg}`);
     }
   };
 

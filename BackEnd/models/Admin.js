@@ -49,15 +49,33 @@ router.put("/users/:id", async (req, res) => {
 
 // @desc    Delete user
 // @route   DELETE /api/admin/users/:id
+/* ================= USERS ================= */
+
+// @desc    Delete user
+// @route   DELETE /api/admin/users/:id
 router.delete("/users/:id", async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const { id } = req.params;
+
+    // 1. Validate ID format
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ message: "Invalid User ID format" });
+    }
+
+    const user = await User.findByIdAndDelete(id);
     
-    res.json({ message: "User deleted successfully" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // 2. Success response
+    return res.status(200).json({ 
+      success: true, 
+      message: "User deleted successfully" 
+    });
   } catch (error) {
     console.error("DELETE USER ERROR:", error.message);
-    res.status(500).json({ message: "Delete failed" });
+    return res.status(500).json({ message: "Delete failed on server" });
   }
 });
 
