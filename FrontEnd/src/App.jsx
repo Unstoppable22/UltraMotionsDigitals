@@ -7,24 +7,24 @@ import Footer from "./components/Footer";
 // Pages
 import Home from "./pages/Home";
 import Faq from "./components/Faq";
-import Aboutus from "./pages/aboutus.jsx";
-import Categorysectiongroup from "./components/categorysecgrup.jsx";
+import AboutUs from "./pages/AboutUs"; // Fixed U
+import CategorySectionGroup from "./components/CategorySectionGroup"; // Fixed Case
 import Testimonials from "./components/Testimonials";
-import Launchsection from "./components/Launchsections.jsx";
+import LaunchSection from "./components/LaunchSection"; // Fixed S
 
 // User Pages
 import Dashboard from "./components/Dashboard";
-import Userdashboard from "./pages/Userdashburd.jsx";
+import UserDashboard from "./pages/UserDashboard"; // Fixed Spelling
 import Profile from "./components/Profile";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 
-// Admin Pages - DOUBLE CHECK THESE PATHS FOR CASE SENSITIVITY
-import Adminlogin from "./pages/admin/Adminlugin.jsx";
-import Admindashboard from "./pages/admin/Admindashboard.jsx";
+// Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin"; // Ensure file is AdminLogin.jsx
+import AdminDashboard from "./pages/admin/AdminDashboard"; // Ensure file is AdminDashboard.jsx
 
 // Route Protection
-import Protectedroute from "./components/Protectedroute.jsx";
+import ProtectedRoute from "./components/ProtectedRoute"; // Fixed Case
 
 export default function App() {
   const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -32,9 +32,7 @@ export default function App() {
   return (
     <Router>
       <Navbar />
-
       <Routes>
-        {/* PUBLIC ROUTES */}
         <Route path="/" element={<Home />} />
         <Route path="/faq" element={<Faq />} />
         <Route path="/about" element={<AboutUs />} />
@@ -44,7 +42,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
 
-        {/* USER PROTECTED ROUTES */}
+        {/* PROTECTED ROUTES */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/user-dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -59,18 +57,12 @@ export default function App() {
                 users={[]} 
                 bookings={[]} 
                 API_BASE_URL={API_URL} 
-                handleSave={(id, data) => console.log("Save", id, data)}
-                handleDeleteUser={(id) => console.log("Delete", id)}
-                handleBookingStatus={(id, status) => console.log("Status", id, status)}
               />
             </ProtectedRoute>
           }
         />
-
-        {/* 404 NOT FOUND */}
         <Route path="*" element={<h1 className="text-center mt-20 text-3xl">404 - Page Not Found</h1>} />
       </Routes>
-
       <Footer />
     </Router>
   );
