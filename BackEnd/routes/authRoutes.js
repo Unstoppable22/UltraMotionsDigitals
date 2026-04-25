@@ -2,15 +2,15 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { signup, login } from "../config/controllers/authController.js";
+import { signup, login, getProfile, updateProfile, updateProfilePhoto } from "../config/controllers/authController.js";
 import { protect } from "../middleware/authMiddleware.js";
-import User from "../models/User.js";
 
 const router = express.Router();
 
+// --- MULTER SETUP ---
 const uploadDir = "uploads/";
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
@@ -27,32 +27,15 @@ const upload = multer({ storage });
 router.post("/signup", signup);
 router.post("/login", login);
 
-// ✅ ADDED: GET USER PROFILE (This fixes your 404 error)
-router.get("/profile", protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
-  }
-});
+// --- PROFILE ROUTES ---
 
-// --- PROFILE PHOTO UPLOAD ---
-router.post("/profile/photo", protect, upload.single("profilePhoto"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+// GET: Fetch user data
+router.get("/profile", protect, getProfile);
 
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+// PUT: Update user name/email (This fixes your "Cannot PUT" error)
+router.put("/profile", protect, updateProfile);
 
-    user.profilePhoto = req.file.filename;
-    await user.save();
-
-    res.json({ success: true, message: "Profile photo updated", profilePhoto: user.profilePhoto });
-  } catch (error) {
-    res.status(500).json({ message: "Photo upload failed", error: error.message });
-  }
-});
+// POST: Update profile photo
+router.post("/profile/photo", protect, upload.single("profilePhoto"), updateProfilePhoto);
 
 export default router;

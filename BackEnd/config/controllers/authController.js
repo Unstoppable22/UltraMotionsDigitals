@@ -42,15 +42,11 @@ export const signup = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        role: user.role, // ✅ FIXED: Added role
+        role: user.role,
       },
     });
-
   } catch (error) {
     console.error("🔥 Signup Error:", error);
-    if (error.code === 11000) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
     return res.status(500).json({ message: "Server error during signup", error: error.message });
   }
 };
@@ -59,11 +55,6 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
-    }
-
     const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
@@ -78,12 +69,73 @@ export const login = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        role: user.role, // ✅ FIXED: Added role
+        role: user.role,
       },
     });
-
   } catch (error) {
-    console.error("🔥 Login Error:", error);
     return res.status(500).json({ message: "Server error during login" });
+  }
+};
+
+// @desc    Get user profile
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// @desc    Update user profile (Name/Email)
+export const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Split name back into firstName/lastName if your frontend sends a single "name" string
+    if (req.body.name) {
+      const parts = req.body.name.trim().split(" ");
+      user.firstName = parts[0] || user.firstName;
+      user.lastName = parts.slice(1).join(" ") || user.lastName;
+    }
+
+    user.email = req.body.email || user.email;
+
+    const updatedUser = await user.save();
+    res.json({
+      success: true,
+      user: {
+        id: updatedUser._id,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        role: updatedUser.role,
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Update failed", error: error.message });
+  }
+};
+
+// @desc    Update profile photo
+export const updateProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.profilePhoto = req.file.filename;
+    await user.save();
+
+    res.json({ 
+      success: true, 
+      message: "Photo updated", 
+      profilePhoto: user.profilePhoto 
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Photo upload failed", error: error.message });
   }
 };
