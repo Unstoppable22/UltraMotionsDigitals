@@ -7,11 +7,13 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+// 1. Ensure uploads directory exists
 const uploadDir = "uploads/";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
 }
 
+// 2. Multer Configuration for media uploads
 const storage = multer.diskStorage({
   destination: uploadDir,
   filename: (req, file, cb) => {
@@ -27,9 +29,8 @@ const upload = multer({ storage });
 router.get("/my-bookings", protect, async (req, res) => {
   try {
     // Finds bookings where 'userId' matches the logged-in user
-    // Make sure your Booking model uses 'userId' (or change this to 'user' if that's your field name)
     const myBookings = await Booking.find({ userId: req.user._id }).sort({ createdAt: -1 });
-    res.json(myBookings);
+    res.json(myBookings || []);
   } catch (error) {
     console.error("❌ FETCH ERROR:", error.message);
     res.status(500).json({ message: "Could not fetch campaign history" });
@@ -37,15 +38,40 @@ router.get("/my-bookings", protect, async (req, res) => {
 });
 
 /**
+ * @route   GET /api/bookings/:id
+ * @desc    Get a single booking by ID (For View Details Page)
+ */
+router.get("/:id", protect, async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking) {
+      return res.status(404).json({ message: "Campaign not found" });
+    }
+
+    // Security: Only allow the owner or an admin to see this specific campaign
+    const isOwner = booking.userId.toString() === req.user._id.toString();
+    if (!isOwner && !req.user.isAdmin) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    res.json(booking);
+  } catch (error) {
+    console.error("❌ FETCH SINGLE ERROR:", error.message);
+    res.status(500).json({ message: "Server error while fetching campaign details" });
+  }
+});
+
+/**
  * @route   POST /api/bookings
- * @desc    Create a new booking
+ * @desc    Create a new billboard booking
  */
 router.post("/", protect, upload.single("media"), async (req, res) => {
   try {
     const bookingData = {
       billboardId: req.body.billboardId || `BILL-${Date.now()}`,
       userId: req.user?._id,
-      userName: req.user?.name || `${req.user?.firstName} ${req.user?.lastName}`,
+      userName: req.user?.name || `${req.user?.firstName || "User"} ${req.user?.lastName || ""}`,
       userEmail: req.user?.email,
       billboardTitle: req.body.billboardTitle || "Standard billboard",
       startDate: new Date(req.body.startDate),

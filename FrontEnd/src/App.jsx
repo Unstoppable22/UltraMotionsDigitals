@@ -10,46 +10,44 @@ import Login from "./components/Login";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Protectedroute from "./components/Protectedroute";
+import CampaignDetails from "./pages/CampaignDetails";
 
 export default function App() {
   const API_URL = import.meta.env.VITE_API_BASE_URL || "https://ultramotionsdigitals.onrender.com";
 
   return (
     <Router>
+      <Navbar />
       <Routes>
-        {/* --- PUBLIC & USER ROUTES (With Navbar/Footer) --- */}
-        <Route
-          path="/*"
-          element={
-            <>
-              <Navbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<AboutUs />} />
-                <Route path="/category" element={<CategorySectionGroup />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/login" element={<Login />} />
-                <Route 
-                  path="/user-dashboard" 
-                  element={<Protectedroute><UserDashboard /></Protectedroute>} 
-                />
-              </Routes>
-              <Footer />
-            </>
-          }
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/category" element={<CategorySectionGroup />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* User Routes */}
+        <Route 
+          path="/user-dashboard" 
+          element={<Protectedroute><UserDashboard /></Protectedroute>} 
+        />
+        <Route 
+          path="/campaign/:id" 
+          element={<Protectedroute><CampaignDetails /></Protectedroute>} 
         />
 
-        {/* --- ADMIN ROUTES --- */}
-<Route path="/AdminLogin" element={<AdminLogin />} />
-<Route
-  path="/AdminDashboard"
-  element={
-    <Protectedroute adminOnly={true}>
-      <AdminDashboard API_BASE_URL={API_URL} />
-    </Protectedroute>
-  }
-/>
+        {/* Admin Routes */}
+        <Route path="/AdminLogin" element={<AdminLogin />} />
+        <Route
+          path="/AdminDashboard"
+          element={
+            <Protectedroute adminOnly={true}>
+              <AdminDashboard API_BASE_URL={API_URL} />
+            </Protectedroute>
+          }
+        />
       </Routes>
+      <Footer />
     </Router>
   );
 }
