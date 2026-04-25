@@ -7,6 +7,8 @@ import CategorySectionGroup from "./components/CategorySectionGroup";
 import UserDashboard from "./pages/UserDashboard";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
+// FIX: Ensure the import starts with a Capital 'P' and matches the filename
+import Profile from "./pages/Profile"; 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Protectedroute from "./components/Protectedroute";
@@ -31,11 +33,13 @@ export default function App() {
           path="/user-dashboard" 
           element={<Protectedroute><UserDashboard /></Protectedroute>} 
         />
-        {/* FIX: Added the /profile route so your Navbar doesn't break */}
+        
+        {/* FIX: Use the Profile component here instead of UserDashboard */}
         <Route 
           path="/profile" 
-          element={<Protectedroute><UserDashboard /></Protectedroute>} 
+          element={<Protectedroute><Profile /></Protectedroute>} 
         />
+        
         <Route 
           path="/campaign/:id" 
           element={<Protectedroute><CampaignDetails /></Protectedroute>} 
