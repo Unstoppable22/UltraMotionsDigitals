@@ -35,7 +35,7 @@ export default function App() {
         
         {/* FIX: Use the Profile component here instead of UserDashboard */}
         <Route 
-          path="/profile" 
+          path="/Profile" 
           element={<Protectedroute><Profile /></Protectedroute>} 
         />
         
