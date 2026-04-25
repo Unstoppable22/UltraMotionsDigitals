@@ -31,6 +31,11 @@ export default function App() {
           path="/user-dashboard" 
           element={<Protectedroute><UserDashboard /></Protectedroute>} 
         />
+        {/* FIX: Added the /profile route so your Navbar doesn't break */}
+        <Route 
+          path="/profile" 
+          element={<Protectedroute><UserDashboard /></Protectedroute>} 
+        />
         <Route 
           path="/campaign/:id" 
           element={<Protectedroute><CampaignDetails /></Protectedroute>} 
