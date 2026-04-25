@@ -11,13 +11,13 @@ import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const app = express();
 
-// 1. Directory Setup for Uploads
+// 1. Folder setup
 const dir = './uploads';
 if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir);
 }
 
-// 2. CORS Configuration
+// 2. CORS setup
 const allowedOrigins = [
     "https://ultramotiondigitals.com",
     "https://www.ultramotiondigitals.com",
@@ -29,7 +29,6 @@ const allowedOrigins = [
 
 const corsOptions = {
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl)
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -41,12 +40,8 @@ const corsOptions = {
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
 };
 
-// Apply CORS to all requests
 app.use(cors(corsOptions));
-
-// ✅ FIX: The "PathError" fix for modern Express/Node versions
-// Use a regex (.*) instead of the string "*"
-app.options(/(.*)/, cors(corsOptions));
+app.options(/(.*)/, cors(corsOptions)); // Fixes PathError for modern Node
 
 // 3. Global Middleware
 app.use(express.json());
@@ -58,10 +53,10 @@ app.get("/", (req, res) => {
     res.send("✅ Ultra Motions Digitals Backend is running!");
 });
 
-// Register specialized routes
-app.use("/api/auth", authRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/admin", adminRoutes);
+// These prefixes determine the URLs:
+app.use("/api/auth", authRoutes);      // URLs start with /api/auth
+app.use("/api/bookings", bookingRoutes); // URLs start with /api/bookings
+app.use("/api/admin", adminRoutes);    // URLs start with /api/admin
 
 // 5. Global Error Handler
 app.use((err, req, res, next) => {
@@ -71,16 +66,11 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 6. Database Connection & Server Start
 const startServer = async () => {
     try {
         const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+        if (!mongoURI) throw new Error("MONGODB_URI is missing");
         
-        if (!mongoURI) {
-            throw new Error("MONGODB_URI is missing from .env file");
-        }
-
-        console.log("⏳ Connecting to MongoDB...");
         await mongoose.connect(mongoURI);
         console.log("✅ MongoDB Connected Successfully");
 
