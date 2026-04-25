@@ -1,10 +1,11 @@
 import { Navigate } from "react-router-dom";
 
 export default function Protectedroute({ children, adminOnly = false }) {
-  const token = localStorage.getItem("token");
+  // Use "userToken" to match your Login and Profile logic
+  const token = localStorage.getItem("userToken");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // 1. If no token, everyone goes to login
+  // 1. If no token, redirect to login
   if (!token) {
     return <Navigate to="/login" replace />;
   }
