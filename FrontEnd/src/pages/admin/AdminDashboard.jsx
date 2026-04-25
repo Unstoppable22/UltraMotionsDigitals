@@ -12,14 +12,12 @@ export default function AdminDashboard({ API_BASE_URL }) {
     try {
       const token = localStorage.getItem("token");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-
-      const [usersRes, bookingsRes] = await Promise.all([
+      const [uRes, bRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/api/admin/users`, config),
         axios.get(`${API_BASE_URL}/api/admin/bookings`, config)
       ]);
-
-      setUsers(usersRes.data);
-      setBookings(bookingsRes.data);
+      setUsers(uRes.data);
+      setBookings(bRes.data);
     } catch (err) {
       console.error("Fetch error:", err);
     } finally {
@@ -39,11 +37,9 @@ export default function AdminDashboard({ API_BASE_URL }) {
   const handleSaveUser = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `${API_BASE_URL}/api/admin/users/${id}`,
-        editForm,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.put(`${API_BASE_URL}/api/admin/users/${id}`, editForm, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setEditingUserId(null);
       fetchData();
     } catch (err) {
@@ -60,95 +56,70 @@ export default function AdminDashboard({ API_BASE_URL }) {
       });
       fetchData();
     } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Delete failed. Check if user still exists.");
+      alert("Delete failed.");
     }
   };
 
   const handleBookingStatus = async (id, status) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `${API_BASE_URL}/api/admin/bookings/${id}`, 
-        { status }, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      fetchData(); 
+      await axios.put(`${API_BASE_URL}/api/admin/bookings/${id}`, { status }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      fetchData();
     } catch (err) {
       alert("Failed to update status.");
     }
   };
 
   if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-gray-100">
-      <div className="text-xl font-semibold text-gray-600 animate-pulse">Loading Ultra Motions Dashboard...</div>
+    <div className="flex h-screen items-center justify-center bg-gray-100 font-sans">
+      <div className="text-xl font-bold text-gray-700 animate-bounce">ULTRA MOTIONS ADMIN...</div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 font-sans">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans text-gray-900">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-10 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Admin Management Portal</h1>
-          <p className="text-gray-500 mt-2">Manage users and review billboard advertising campaigns</p>
+        <header className="mb-10">
+          <h1 className="text-4xl font-extrabold tracking-tight">Ultra Motions Dashboard</h1>
+          <p className="text-gray-500">Real-time billboard management & client oversight</p>
         </header>
 
         {/* --- USERS SECTION --- */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-12">
-          <div className="bg-gray-900 px-6 py-4 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-white">Registered Users ({users.length})</h2>
+          <div className="bg-gray-900 px-6 py-4">
+            <h2 className="text-lg font-bold text-white">Clients ({users.length})</h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 border-b border-gray-200">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="p-4 font-semibold text-gray-600">Profile</th>
-                  <th className="p-4 font-semibold text-gray-600">Full Name</th>
-                  <th className="p-4 font-semibold text-gray-600">Email Address</th>
-                  <th className="p-4 text-center font-semibold text-gray-600">Actions</th>
+                  <th className="p-4 text-sm font-bold text-gray-600">User</th>
+                  <th className="p-4 text-sm font-bold text-gray-600">Email</th>
+                  <th className="p-4 text-center text-sm font-bold text-gray-600">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.map((user) => (
                   <tr key={user._id} className="border-b last:border-0 hover:bg-gray-50 transition">
-                    <td className="p-4">
-                      {user.profilePhoto ? (
-                        <img 
-                          src={`${API_BASE_URL}/uploads/${user.profilePhoto}`} 
-                          className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" 
-                          alt="User" 
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
-                          {user.firstName?.charAt(0) || "U"}
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-4 text-gray-800">
+                    <td className="p-4 font-medium">
                       {editingUserId === user._id ? (
-                        <input 
-                          value={editForm.name} 
-                          onChange={(e) => setEditForm({...editForm, name: e.target.value})} 
-                          className="border border-blue-400 rounded px-3 py-1.5 w-full outline-none" 
-                        />
+                        <input value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="border rounded px-2 py-1 w-full" />
                       ) : user.name || `${user.firstName} ${user.lastName}`}
                     </td>
                     <td className="p-4 text-gray-600">
                       {editingUserId === user._id ? (
-                        <input 
-                          value={editForm.email} 
-                          onChange={(e) => setEditForm({...editForm, email: e.target.value})} 
-                          className="border border-blue-400 rounded px-3 py-1.5 w-full outline-none" 
-                        />
+                        <input value={editForm.email} onChange={(e) => setEditForm({...editForm, email: e.target.value})} className="border rounded px-2 py-1 w-full" />
                       ) : user.email}
                     </td>
                     <td className="p-4 text-center space-x-2">
                       {editingUserId === user._id ? (
-                        <button onClick={() => handleSaveUser(user._id)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition">Save</button>
+                        <button onClick={() => handleSaveUser(user._id)} className="text-green-600 font-bold">Save</button>
                       ) : (
                         <>
-                          <button onClick={() => startEdit(user)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition">Edit</button>
-                          <button onClick={() => handleDeleteUser(user._id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition">Delete</button>
+                          <button onClick={() => startEdit(user)} className="text-blue-600 font-bold">Edit</button>
+                          <button onClick={() => handleDeleteUser(user._id)} className="text-red-500 font-bold">Delete</button>
                         </>
                       )}
                     </td>
@@ -162,73 +133,59 @@ export default function AdminDashboard({ API_BASE_URL }) {
         {/* --- CAMPAIGNS SECTION --- */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-gray-900 px-6 py-4">
-            <h2 className="text-lg font-bold text-white">Active Billboard Campaigns ({bookings.length})</h2>
+            <h2 className="text-lg font-bold text-white">Ad Campaigns ({bookings.length})</h2>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-gray-50 border-b border-gray-200">
+            <table className="w-full text-left">
+              <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="p-4 font-semibold text-gray-600">Client</th>
-                  <th className="p-4 font-semibold text-gray-600">Campaign Content</th>
-                  <th className="p-4 font-semibold text-gray-600">Submit Date</th>
-                  <th className="p-4 font-semibold text-gray-600">Status</th>
-                  <th className="p-4 text-center font-semibold text-gray-600">Management</th>
+                  <th className="p-4 text-sm font-bold text-gray-600">Client</th>
+                  <th className="p-4 text-sm font-bold text-gray-600">Media</th>
+                  <th className="p-4 text-sm font-bold text-gray-600">Status</th>
+                  <th className="p-4 text-center text-sm font-bold text-gray-600">Live Control</th>
                 </tr>
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b._id} className="border-b last:border-0 hover:bg-gray-50 transition">
+                  <tr key={b._id} className="border-b hover:bg-gray-50 transition">
                     <td className="p-4">
-                      <div className="font-bold text-gray-900">{b.userName || "Unknown Client"}</div>
-                      <div className="text-xs text-gray-500">{b.userEmail}</div>
-                    </td>
-
-                    {/* NEW: MEDIA PREVIEW SECTION */}
-                    <td className="p-4">
-                      {b.mediaUrl ? (
-                        <div className="relative group w-24 h-14 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                          <img 
-                            src={`${API_BASE_URL}${b.mediaUrl}`} 
-                            alt="Campaign Design" 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform cursor-pointer"
-                            onClick={() => window.open(`${API_BASE_URL}${b.mediaUrl}`, '_blank')}
-                          />
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
-                            <span className="text-[10px] text-white font-bold">VIEW FULL</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-24 h-14 bg-gray-50 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-[10px] text-gray-400">
-                          NO MEDIA
-                        </div>
-                      )}
-                    </td>
-
-                    <td className="p-4 text-gray-600 text-sm">
-                      {new Date(b.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      <div className="font-bold text-sm">{b.userName}</div>
+                      <div className="text-[10px] text-gray-400 uppercase">{b.billboardTitle}</div>
                     </td>
                     <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                        b.status === 'approved' ? 'bg-green-100 text-green-700 border border-green-200' : 
-                        b.status === 'rejected' ? 'bg-red-100 text-red-700 border border-red-200' : 
-                        'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                      <img 
+                        src={`${API_BASE_URL}${b.mediaUrl}`} 
+                        alt="Campaign" 
+                        className="w-16 h-10 object-cover rounded shadow-sm cursor-pointer hover:scale-110 transition"
+                        onClick={() => window.open(`${API_BASE_URL}${b.mediaUrl}`, '_blank')}
+                      />
+                    </td>
+                    <td className="p-4">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter border ${
+                        b.status === 'running' ? 'bg-blue-600 text-white border-blue-700 shadow-md' : 
+                        b.status === 'approved' ? 'bg-green-100 text-green-700 border-green-200' : 
+                        b.status === 'rejected' ? 'bg-red-100 text-red-700 border-red-200' : 
+                        b.status === 'completed' ? 'bg-gray-200 text-gray-700 border-gray-300' :
+                        'bg-yellow-100 text-yellow-700 border-yellow-200'
                       }`}>
                         {b.status}
                       </span>
                     </td>
-                    <td className="p-4 text-center space-x-2">
-                      <button 
-                        onClick={() => handleBookingStatus(b._id, "approved")} 
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition shadow-sm"
-                      >
-                        APPROVE
-                      </button>
-                      <button 
-                        onClick={() => handleBookingStatus(b._id, "rejected")} 
-                        className="bg-gray-100 hover:bg-red-600 hover:text-white text-gray-600 px-4 py-1.5 rounded-lg text-xs font-bold transition border border-gray-200"
-                      >
-                        REJECT
-                      </button>
+                    <td className="p-4 text-center">
+                      <div className="flex justify-center space-x-2">
+                        {b.status === "pending" && (
+                          <>
+                            <button onClick={() => handleBookingStatus(b._id, "approved")} className="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-bold shadow-sm">APPROVE</button>
+                            <button onClick={() => handleBookingStatus(b._id, "rejected")} className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-[10px] font-bold">REJECT</button>
+                          </>
+                        )}
+                        {b.status === "approved" && (
+                          <button onClick={() => handleBookingStatus(b._id, "running")} className="bg-blue-600 text-white px-4 py-1.5 rounded text-[10px] font-bold shadow-lg animate-pulse">START CAMPAIGN</button>
+                        )}
+                        {b.status === "running" && (
+                          <button onClick={() => handleBookingStatus(b._id, "completed")} className="bg-black text-white px-3 py-1 rounded text-[10px] font-bold">MARK ENDED</button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

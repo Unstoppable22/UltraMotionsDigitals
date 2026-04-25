@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/sendEmail.js";
-import { sendWhatsApp } from "../utils/sendWhatsApp.js";
 
 const bookingSchema = new mongoose.Schema(
   {
@@ -17,32 +16,25 @@ const bookingSchema = new mongoose.Schema(
     agreed: { type: Boolean, default: true },
     status: { 
       type: String, 
-      enum: ["pending", "approved", "rejected"], 
+      enum: ["pending", "approved", "rejected", "running", "completed"], 
       default: "pending" 
     },
   },
   { timestamps: true }
 );
 
-// --- NOTIFICATIONS ---
+// NOTIFICATION LOGIC
 bookingSchema.post("save", async function (doc) {
-  const approveLink = `${process.env.FRONTEND_URL}/admin/dashboard`;
   try {
-    await sendEmail({
-      to: process.env.ADMIN_EMAIL,
-      subject: "📢 New Booking Received - Ultra Motion",
-      text: `New booking by ${doc.userName} for "${doc.billboardTitle}".\n\nView details: ${approveLink}`
-    });
-
-    if (process.env.ADMIN_WHATSAPP) {
-      await sendWhatsApp({
-        to: process.env.ADMIN_WHATSAPP,
-        message: `📢 *New Booking Received*\n\n*Client:* ${doc.userName}\n*Billboard:* ${doc.billboardTitle}`
+    // 1. Alert Admin on New Booking
+    if (this.isNew) {
+      await sendEmail({
+        to: process.env.ADMIN_EMAIL,
+        subject: "📢 New Booking Received - Ultra Motion",
+        text: `New booking by ${doc.userName} for "${doc.billboardTitle}". Check dashboard to review.`
       });
     }
-  } catch (err) {
-    console.error("❌ Notification Error:", err.message);
-  }
+  } catch (err) { console.error("Email Error:", err.message); }
 });
 
 const Booking = mongoose.model("Booking", bookingSchema);

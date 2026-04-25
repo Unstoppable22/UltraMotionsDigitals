@@ -1,121 +1,120 @@
 import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import Admin from "../models/Admin.js";
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
-// Optional: Import your protect/admin middleware if you have one
-// import { protect, admin } from "../middleware/authMiddleware.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 const router = express.Router();
 
 /**
- * NOTE: If you have admin middleware, apply it to all routes here:
- * router.use(protect);
- * router.use(admin);
+ * ADMIN LOGIN
  */
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const admin = await Admin.findOne({ email });
+    if (!admin) return res.status(401).json({ message: "Invalid credentials" });
 
-/* ================= USERS ================= */
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-// @desc    Get all users (excluding passwords)
-// @route   GET /api/admin/users
+    const token = jwt.sign(
+      { id: admin._id, email: admin.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ success: true, token, admin: { id: admin._id, email: admin.email } });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ================= USER MANAGEMENT ================= */
+
 router.get("/users", async (req, res) => {
   try {
     const users = await User.find().select("-password").sort({ createdAt: -1 });
     res.json(users);
-  } catch (error) {
-    console.error("GET USERS ERROR:", error.message);
-    res.status(500).json({ message: "Failed to fetch users" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error fetching users" });
   }
 });
 
-// @desc    Update user details
-// @route   PUT /api/admin/users/:id
 router.put("/users/:id", async (req, res) => {
   try {
     const { name, email } = req.body;
-    
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { name, email },
-      { new: true, runValidators: true }
+      { new: true }
     ).select("-password");
-
     if (!user) return res.status(404).json({ message: "User not found" });
-    
     res.json(user);
-  } catch (error) {
-    console.error("UPDATE USER ERROR:", error.message);
+  } catch (err) {
     res.status(500).json({ message: "Update failed" });
   }
 });
 
-// @desc    Delete user
-// @route   DELETE /api/admin/users/:id
-/* ================= USERS ================= */
-
-// @desc    Delete user
-// @route   DELETE /api/admin/users/:id
 router.delete("/users/:id", async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // 1. Validate ID format
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ message: "Invalid User ID format" });
-    }
-
-    const user = await User.findByIdAndDelete(id);
-    
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    
-    // 2. Success response
-    return res.status(200).json({ 
-      success: true, 
-      message: "User deleted successfully" 
-    });
-  } catch (error) {
-    console.error("DELETE USER ERROR:", error.message);
-    return res.status(500).json({ message: "Delete failed on server" });
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ success: true, message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Delete failed" });
   }
 });
 
-/* ================= BOOKINGS ================= */
+/* ================= BOOKING MANAGEMENT ================= */
 
-// @desc    Get all bookings with newest first
-// @route   GET /api/admin/bookings
 router.get("/bookings", async (req, res) => {
   try {
     const bookings = await Booking.find().sort({ createdAt: -1 });
     res.json(bookings);
-  } catch (error) {
-    console.error("GET BOOKINGS ERROR:", error.message);
+  } catch (err) {
     res.status(500).json({ message: "Server error fetching bookings" });
   }
 });
 
-// @desc    Update booking status (Universal Route)
-// @route   PUT /api/admin/bookings/:id
+// UPDATE booking status with Email Notifications
 router.put("/bookings/:id", async (req, res) => {
   try {
     const { status } = req.body;
-
-    // Validation: Ensure status is valid
-    const validStatuses = ["pending", "approved", "rejected"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
-    }
-
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true }
     );
-
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
+    // --- NOTIFICATION LOGIC ---
+    let emailSubject = "";
+    let emailText = "";
+
+    if (status === "approved") {
+      emailSubject = "Campaign Approved - Ultra Motions";
+      emailText = `Hello ${booking.userName},\n\nGreat news! Your campaign "${booking.billboardTitle}" has been approved. We are preparing it for launch.`;
+    } else if (status === "rejected") {
+      emailSubject = "Campaign Update - Ultra Motions";
+      emailText = `Hello ${booking.userName},\n\nYour campaign "${booking.billboardTitle}" was not approved at this time. Please log in to your dashboard to review the requirements or contact support.`;
+    } else if (status === "running") {
+      emailSubject = "Your Campaign is LIVE! - Ultra Motions";
+      emailText = `Hello ${booking.userName},\n\nCongratulations! Your campaign "${booking.billboardTitle}" is now running live on our billboards.`;
+    }
+
+    if (emailSubject) {
+      await sendEmail({
+        to: booking.userEmail,
+        subject: emailSubject,
+        text: emailText
+      });
+    }
+
     res.json(booking);
-  } catch (error) {
-    console.error("UPDATE BOOKING ERROR:", error.message);
+  } catch (err) {
     res.status(500).json({ message: "Status update failed" });
   }
 });

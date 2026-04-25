@@ -1,6 +1,7 @@
 import User from "../../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { sendEmail } from "../utils/sendEmail.js";
 
 const generateToken = (id) => {
   return jwt.sign(
@@ -33,6 +34,17 @@ export const signup = async (req, res) => {
       password, 
       phone,
     });
+
+    // --- NEW: WELCOME & VERIFICATION NOTIFICATION ---
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Welcome to Ultra Motions - Account Verified",
+        text: `Hello ${user.firstName},\n\nYour account has been successfully created and verified. You can now log in to book and manage your billboard campaigns.\n\nWelcome to the future of outdoor advertising.`
+      });
+    } catch (mailErr) {
+      console.error("Welcome email failed to send:", mailErr.message);
+    }
 
     return res.status(201).json({
       success: true,
@@ -88,13 +100,12 @@ export const getProfile = async (req, res) => {
   }
 };
 
-// @desc    Update user profile (Name/Email)
+// @desc    Update user profile
 export const updateProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Split name back into firstName/lastName if your frontend sends a single "name" string
     if (req.body.name) {
       const parts = req.body.name.trim().split(" ");
       user.firstName = parts[0] || user.firstName;
@@ -102,8 +113,8 @@ export const updateProfile = async (req, res) => {
     }
 
     user.email = req.body.email || user.email;
-
     const updatedUser = await user.save();
+    
     res.json({
       success: true,
       user: {
