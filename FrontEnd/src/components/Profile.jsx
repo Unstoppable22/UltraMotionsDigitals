@@ -7,32 +7,34 @@ export default function Profile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Consistency: Check both common token keys
   const token = localStorage.getItem("userToken") || localStorage.getItem("token");
   const API_BASE = "https://ultramotionsdigitals.onrender.com";
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
       try {
         const res = await axios.get(`${API_BASE}/api/auth/profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // FIX: If backend accidentally sends campaigns (Array), don't break the UI
+        // Handle Array response (Campaigns) vs Object response (User)
         if (Array.isArray(res.data)) {
-          console.error("Received Campaign Array instead of User Profile Object");
-          // Use the first item's user data as a fallback if necessary
-          const fallbackUser = res.data[0];
+          const fallback = res.data[0];
           setUser({
-            name: fallbackUser.userName,
-            email: fallbackUser.userEmail,
-            role: "user"
+            name: fallback.userName,
+            email: fallback.userEmail,
+            _id: fallback.userId
           });
-          setName(fallbackUser.userName);
-          setEmail(fallbackUser.userEmail);
+          setName(fallback.userName || "");
+          setEmail(fallback.userEmail || "");
         } else {
-          // Standard Path: Backend sends User Object
           setUser(res.data);
           setName(res.data.name || res.data.userName || "");
           setEmail(res.data.email || "");
@@ -42,9 +44,12 @@ export default function Profile() {
         }
       } catch (err) {
         console.error("Profile Fetch Error:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    if (token) fetchProfile();
+
+    fetchProfile();
   }, [token]);
 
   const handleUpdate = async () => {
@@ -61,6 +66,8 @@ export default function Profile() {
     }
   };
 
+  if (loading) return <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">Loading Profile...</div>;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-6">
       <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-700">
@@ -69,12 +76,12 @@ export default function Profile() {
         <div className="flex flex-col items-center mb-6">
           <div className="w-24 h-24 rounded-full bg-gray-700 border-4 border-blue-500 overflow-hidden mb-4">
             <img 
-              src={photoPreview || "https://ui-avatars.com/api/?name=" + name} 
+              src={photoPreview || `https://ui-avatars.com/api/?name=${name || 'User'}`} 
               alt="Profile" 
               className="w-full h-full object-cover"
             />
           </div>
-          <p className="text-sm text-gray-400">Account ID: {user._id || "Loading..."}</p>
+          <p className="text-xs text-gray-500 font-mono">ID: {user._id || "N/A"}</p>
         </div>
 
         {!editMode ? (
@@ -85,7 +92,7 @@ export default function Profile() {
             </div>
             <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
               <label className="text-xs text-gray-500 uppercase font-bold">Email Address</label>
-              <p className="text-lg">{email}</p>
+              <p className="text-lg">{email || user.email}</p>
             </div>
             <button 
               onClick={() => setEditMode(true)}
@@ -97,16 +104,16 @@ export default function Profile() {
         ) : (
           <div className="space-y-4">
             <input 
-              className="w-full p-4 rounded-xl bg-gray-700 border border-blue-500" 
+              className="w-full p-4 rounded-xl bg-gray-700 border border-blue-500 text-white" 
               value={name} 
               onChange={(e) => setName(e.target.value)}
-              placeholder="Name"
+              placeholder="Enter Name"
             />
             <input 
-              className="w-full p-4 rounded-xl bg-gray-700 border border-gray-600" 
+              className="w-full p-4 rounded-xl bg-gray-700 border border-gray-600 text-white" 
               value={email} 
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              placeholder="Enter Email"
             />
             <div className="flex gap-3">
               <button onClick={handleUpdate} className="flex-1 bg-green-600 py-3 rounded-xl font-bold">Save</button>

@@ -48,9 +48,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// 🔥 FIX FOR PATHERROR IN NODE V22:
-// Instead of app.options("*"), use the Regex /(.*)/
 app.options(/(.*)/, cors(corsOptions)); 
 
 // 3. Global Middleware
@@ -58,14 +55,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// 4. Routes
+// 4. Routes 
+// MOUNT AUTH FIRST to prevent other routes from intercepting "/profile"
+app.use("/api/auth", authRoutes);       
+app.use("/api/bookings", bookingRoutes); 
+app.use("/api/admin", adminRoutes);    
+
 app.get("/", (req, res) => {
     res.send("✅ Ultra Motions Digitals Backend is running!");
 });
-
-app.use("/api/auth", authRoutes);      
-app.use("/api/bookings", bookingRoutes); 
-app.use("/api/admin", adminRoutes);    
 
 // 5. Global Error Handler
 app.use((err, req, res, next) => {
