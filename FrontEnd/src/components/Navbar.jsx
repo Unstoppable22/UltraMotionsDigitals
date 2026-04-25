@@ -48,7 +48,7 @@ export default function Navbar() {
         ) : (
           <>
             <li><Link to="/user-dashboard">Dashboard</Link></li>
-            <li><Link to="/profile">Profile</Link></li>
+            <li><Link to="/Profile">Profile</Link></li>
             <li>
               <button onClick={handleLogout} className="text-white hover:text-red-400 transition">
                 Logout
@@ -79,7 +79,7 @@ export default function Navbar() {
           ) : (
             <>
               <li><Link to="/user-dashboard" onClick={handleLinkClick}>Dashboard</Link></li>
-              <li><Link to="/profile" onClick={handleLinkClick}>Profile</Link></li>
+              <li><Link to="/Profile" onClick={handleLinkClick}>Profile</Link></li>
               <li><button onClick={handleLogout}>Logout</button></li>
             </>
           )}

@@ -7,7 +7,6 @@ import CategorySectionGroup from "./components/CategorySectionGroup";
 import UserDashboard from "./pages/UserDashboard";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
-// FIX: Ensure the import starts with a Capital 'P' and matches the filename
 import Profile from "./pages/Profile"; 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";

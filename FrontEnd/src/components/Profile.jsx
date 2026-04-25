@@ -15,7 +15,7 @@ export default function Profile() {
   const token = localStorage.getItem("userToken") || localStorage.getItem("token");
   const API_BASE = "https://ultramotionsdigitals.onrender.com";
 
-  // Fetch User Profile
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
