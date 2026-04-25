@@ -6,7 +6,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // Added: Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -18,30 +18,30 @@ export default function Login() {
       const res = await axios.post(
         "https://ultramotionsdigitals.onrender.com/api/auth/login", 
         { 
-          email: email.toLowerCase().trim(), // Safety: Clean input
+          email: email.toLowerCase().trim(), 
           password 
         }
       );
       
-      // ✅ Check if the token actually exists before saving
       if (res.data && res.data.token) {
         localStorage.setItem("token", res.data.token); 
         
-        // Optional: Save user info if you need it for the dashboard (like "Welcome, John")
         if (res.data.user) {
           localStorage.setItem("user", JSON.stringify(res.data.user));
         }
+
+        // ✅ THE FIX: Notify the Navbar that auth state has changed
+        window.dispatchEvent(new Event("authChange"));
 
         navigate("/user-dashboard");
       } else {
         setError("Server response error. Please try again.");
       }
     } catch (err) {
-      // ✅ Better Error Handling: Show the ACTUAL error from the server
       const message = err.response?.data?.message || "Invalid email or password";
       setError(message);
     } finally {
-      setLoading(false); // Stop loading regardless of success or failure
+      setLoading(false);
     }
   };
 
@@ -76,7 +76,7 @@ export default function Login() {
 
         <button 
           type="submit" 
-          disabled={loading} // Disable button while waiting
+          disabled={loading} 
           className={`w-full py-3 rounded-md font-semibold transition duration-200 ${
             loading ? "bg-gray-600" : "bg-blue-600 hover:bg-blue-700"
           }`}
