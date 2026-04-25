@@ -7,7 +7,7 @@ import CategorySectionGroup from "./components/CategorySectionGroup";
 import UserDashboard from "./pages/UserDashboard";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
-import Profile from "./pages/Profile"; 
+import Profile from "./components/Profile"; 
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Protectedroute from "./components/Protectedroute";
@@ -33,9 +33,9 @@ export default function App() {
           element={<Protectedroute><UserDashboard /></Protectedroute>} 
         />
         
-        {/* FIX: Use the Profile component here instead of UserDashboard */}
+        {/* Profile Route */}
         <Route 
-          path="/Profile" 
+          path="/profile" 
           element={<Protectedroute><Profile /></Protectedroute>} 
         />
         
