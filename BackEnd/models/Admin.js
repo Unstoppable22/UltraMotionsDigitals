@@ -9,6 +9,7 @@ import { sendWhatsapp } from "../config/utils/sendWhatsapp.js";
 
 const router = express.Router();
 
+/* ================= ADMIN AUTH ================= */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -17,6 +18,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    console.log(`👤 Admin logged in: ${email}`);
     res.json({ success: true, token, admin: { id: admin._id, email: admin.email } });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
@@ -29,13 +31,9 @@ router.get("/users", async (req, res) => {
   res.json(users);
 });
 
-router.put("/users/:id", async (req, res) => {
-  const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(user);
-});
-
 router.delete("/users/:id", async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
+  console.log(`🗑️ User deleted: ${req.params.id}`);
   res.json({ success: true });
 });
 
@@ -45,7 +43,7 @@ router.get("/bookings", async (req, res) => {
   res.json(bookings);
 });
 
-// THIS IS THE MAIN LOGIC FOR STATUS NOTIFICATIONS
+// THE LIVE SHOW: Status Updates
 router.put("/bookings/:id", async (req, res) => {
   try {
     const { status } = req.body;
@@ -53,17 +51,33 @@ router.put("/bookings/:id", async (req, res) => {
 
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
-    // 1. NOTIFY USER VIA EMAIL
-    let subject = `Campaign Update: ${status.toUpperCase()}`;
-    let body = `Hello ${booking.userName}, your billboard campaign "${booking.billboardTitle}" is now ${status}.`;
+    console.log(`🔄 STATUS CHANGE: ${booking.billboardTitle} is now [${status.toUpperCase()}]`);
 
-    await sendEmail({ to: booking.userEmail, subject: subject, text: body });
+    // 1. NOTIFY USER VIA EMAIL
+    try {
+      console.log(`📩 Sending ${status} email to ${booking.userEmail}...`);
+      await sendEmail({ 
+        to: booking.userEmail, 
+        subject: `Campaign Update: ${status.toUpperCase()}`, 
+        text: `Hello ${booking.userName}, your campaign for "${booking.billboardTitle}" is now ${status}.` 
+      });
+      console.log("✅ Email sent successfully.");
+    } catch (mailErr) {
+      console.error("❌ Email failed:", mailErr.message);
+    }
 
     // 2. NOTIFY ADMIN VIA WHATSAPP
-    await sendWhatsapp(`Status Updated! ✅\nBillboard: ${booking.billboardTitle}\nClient: ${booking.userName}\nNew Status: *${status.toUpperCase()}*`);
+    try {
+      console.log(`📱 Sending WhatsApp alert to Admin...`);
+      await sendWhatsapp(`Status Updated! ✅\nBillboard: ${booking.billboardTitle}\nClient: ${booking.userName}\nNew Status: *${status.toUpperCase()}*`);
+      console.log("✅ WhatsApp alert sent.");
+    } catch (waErr) {
+      console.error("❌ WhatsApp failed:", waErr.message);
+    }
 
     res.json(booking);
   } catch (err) {
+    console.error("🔥 Status Update Crash:", err.message);
     res.status(500).json({ message: "Status update failed", error: err.message });
   }
 });

@@ -4,6 +4,8 @@ import path from "path";
 import fs from "fs";
 import Booking from "../models/Booking.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { sendEmail } from "../config/utils/sendEmail.js";
+import { sendWhatsapp } from "../config/utils/sendWhatsapp.js";
 
 const router = express.Router();
 
@@ -20,43 +22,11 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 1. GET ALL BOOKINGS FOR LOGGED IN USER
-router.get("/my-bookings", protect, async (req, res) => {
-  try {
-    // Crucial: Use req.user._id to match the 'userId' string in your database
-    const myBookings = await Booking.find({ userId: req.user._id }).sort({ createdAt: -1 });
-    res.status(200).json(myBookings || []);
-  } catch (error) {
-    console.error("❌ FETCH ERROR:", error.message);
-    res.status(500).json({ message: "Could not fetch campaign history" });
-  }
-});
-
-// 2. GET SINGLE BOOKING BY ID (For View Details Page)
-router.get("/:id", protect, async (req, res) => {
-  try {
-    const booking = await Booking.findById(req.params.id);
-
-    if (!booking) {
-      return res.status(404).json({ message: "Campaign data not found in database." });
-    }
-
-    // Security: Only allow the owner or an admin to see this
-    const isOwner = booking.userId.toString() === req.user._id.toString();
-    if (!isOwner && !req.user.isAdmin) {
-      return res.status(403).json({ message: "Access denied: You do not own this campaign." });
-    }
-
-    res.status(200).json(booking);
-  } catch (error) {
-    console.error("❌ FETCH SINGLE ERROR:", error.message);
-    res.status(500).json({ message: "Internal server error while fetching details" });
-  }
-});
-
-// 3. CREATE NEW BOOKING
+// CREATE NEW BOOKING
 router.post("/", protect, upload.single("media"), async (req, res) => {
   try {
+    console.log(`🆕 NEW BOOKING ATTEMPT: User ${req.user.email} is booking a billboard.`);
+
     const bookingData = {
       billboardId: req.body.billboardId || `BILL-${Date.now()}`,
       userId: req.user._id,
@@ -73,10 +43,34 @@ router.post("/", protect, upload.single("media"), async (req, res) => {
 
     const booking = new Booking(bookingData);
     await booking.save();
+    
+    console.log(`✅ BOOKING SAVED: ID ${booking._id}`);
+
+    // LIVE NOTIFICATIONS
+    // 1. Email to User
+    await sendEmail({
+      to: booking.userEmail,
+      subject: "Booking Received - Ultra Motions",
+      text: `Hello ${booking.userName}, your booking for ${booking.billboardTitle} has been received and is pending approval.`
+    });
+
+    // 2. WhatsApp to Admin
+    await sendWhatsapp(`New Campaign Booked! 📢\nClient: ${booking.userName}\nBillboard: ${booking.billboardTitle}\nType: ${booking.campaignType}`);
+
     res.status(201).json({ success: true, booking });
   } catch (error) {
-    console.error("❌ SAVING ERROR:", error.message);
-    res.status(500).json({ error: "Failed to save booking. Please check required fields." });
+    console.error("🔥 BOOKING ERROR:", error.message);
+    res.status(500).json({ error: "Failed to save booking." });
+  }
+});
+
+// GET ALL BOOKINGS FOR LOGGED IN USER
+router.get("/my-bookings", protect, async (req, res) => {
+  try {
+    const myBookings = await Booking.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json(myBookings || []);
+  } catch (error) {
+    res.status(500).json({ message: "Could not fetch history" });
   }
 });
 
