@@ -1,42 +1,44 @@
 import nodemailer from "nodemailer";
 
 export const sendEmail = async (options) => {
-  // 1. Log the attempt so you see it in Render
-  console.log(`📩 Preparing email for: ${options.to}`);
+  console.log(`📩 Routing professional email to: ${options.to}`);
 
   try {
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // Use SSL/TLS
+      // FOR QSERVERS: Usually your domain name with 'mail.' in front
+      host: "mail.ultramotiondigitals.com", 
+      port: 465, 
+      secure: true, // Use true for port 465
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER, // info@ultramotiondigitals.com
+        pass: process.env.EMAIL_PASS, 
       },
-      // Increase timeout for server environments
-      connectionTimeout: 10000, 
+      tls: {
+        // This is critical for QServers to prevent SSL handshake errors
+        rejectUnauthorized: false 
+      }
     });
 
-    // 2. Verify connection before sending
+    // Handshake check
     await transporter.verify();
-    console.log("✅ Gmail Connection Verified Successfully");
+    console.log("✅ QServers SMTP Connection Verified");
 
     const mailOptions = {
       from: `"Ultra Motion Digitals" <${process.env.EMAIL_USER}>`,
       to: options.to,
       subject: options.subject,
       text: options.text,
-      html: options.html || options.text, // Sends HTML if provided
+      html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
+              <h2>Ultra Motion Digitals</h2>
+              <p>${options.text}</p>
+             </div>`
     };
 
-    // 3. Send and log result
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent! Message ID: ${info.messageId}`);
-    
-    return info;
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Email delivered via QServers!`);
+
   } catch (error) {
-    // This will now catch and show why the connection failed
-    console.error("🔥 NODEMAILER ERROR:", error.message);
+    console.error("🔥 QSERVERS MAIL ERROR:", error.message);
     throw error;
   }
 };
