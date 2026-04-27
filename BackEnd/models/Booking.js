@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import { sendEmail } from "../utils/sendEmail.js";
-import { sendWhatsapp } from "../utils/sendWhatsapp.js";
+import { sendEmail } from "../config/utils/sendEmail.js";
+import { sendWhatsapp } from "../config/utils/sendWhatsApp.js";
 
 const bookingSchema = new mongoose.Schema(
   {
