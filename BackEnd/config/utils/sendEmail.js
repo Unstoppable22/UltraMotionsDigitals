@@ -1,44 +1,36 @@
 import nodemailer from "nodemailer";
 
 export const sendEmail = async (options) => {
-  console.log(`📩 Routing professional email to: ${options.to}`);
-
   try {
+    // We use process.env so your secrets stay safe in Render
     const transporter = nodemailer.createTransport({
-      // FOR QSERVERS: Usually your domain name with 'mail.' in front
-      host: "mail.ultramotiondigitals.com", 
-      port: 465, 
-      secure: true, // Use true for port 465
+      host: "mail.ultramotiondigitals.com", // Force the domain host
+      port: 465,
+      secure: true, 
       auth: {
-        user: process.env.EMAIL_USER, // info@ultramotiondigitals.com
+        user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS, 
       },
       tls: {
-        // This is critical for QServers to prevent SSL handshake errors
         rejectUnauthorized: false 
       }
     });
 
-    // Handshake check
+    console.log(`📩 Attempting delivery via QServers to: ${options.to}`);
+    
     await transporter.verify();
-    console.log("✅ QServers SMTP Connection Verified");
-
-    const mailOptions = {
+    
+    const info = await transporter.sendMail({
       from: `"Ultra Motion Digitals" <${process.env.EMAIL_USER}>`,
       to: options.to,
       subject: options.subject,
       text: options.text,
-      html: `<div style="font-family: Arial, sans-serif; padding: 20px;">
-              <h2>Ultra Motion Digitals</h2>
-              <p>${options.text}</p>
-             </div>`
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Email delivered via QServers!`);
-
+    console.log("✅ Email Reflection Successful");
+    return info;
   } catch (error) {
-    console.error("🔥 QSERVERS MAIL ERROR:", error.message);
+    console.error("🔥 Reflection Error:", error.message);
     throw error;
   }
 };
