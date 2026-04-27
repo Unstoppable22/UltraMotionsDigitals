@@ -4,8 +4,8 @@ import jwt from "jsonwebtoken";
 import Admin from "../models/Admin.js";
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
-import { sendEmail } from "../utils/sendEmail.js";
-import { sendWhatsapp } from "../utils/sendWhatsapp.js";
+import { sendEmail } from "../config/utils/sendEmail.js";
+import { sendWhatsapp } from "../config/utils/sendWhatsapp.js";
 
 const router = express.Router();
 
