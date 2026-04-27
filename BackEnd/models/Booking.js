@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/sendEmail.js";
+import { sendWhatsapp } from "../utils/sendWhatsapp.js";
 
 const bookingSchema = new mongoose.Schema(
   {
@@ -23,18 +24,23 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// NOTIFICATION LOGIC
+// Triggered when user clicks "Book Now"
 bookingSchema.post("save", async function (doc) {
-  try {
-    // 1. Alert Admin on New Booking
-    if (this.isNew) {
+  if (this.isNew) {
+    try {
+      // 1. Email to User
       await sendEmail({
-        to: process.env.ADMIN_EMAIL,
-        subject: "📢 New Booking Received - Ultra Motion",
-        text: `New booking by ${doc.userName} for "${doc.billboardTitle}". Check dashboard to review.`
+        to: doc.userEmail,
+        subject: "Booking Successfully Received!",
+        text: `Hello ${doc.userName}, we have received your booking for "${doc.billboardTitle}". Our team will review it shortly.`
       });
+
+      // 2. WhatsApp to Admin
+      await sendWhatsapp(`New Booking! 📢\nClient: ${doc.userName}\nBillboard: ${doc.billboardTitle}\nType: ${doc.campaignType}`);
+    } catch (err) {
+      console.error("Booking Notification Error:", err.message);
     }
-  } catch (err) { console.error("Email Error:", err.message); }
+  }
 });
 
 const Booking = mongoose.model("Booking", bookingSchema);
