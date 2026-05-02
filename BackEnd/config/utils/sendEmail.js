@@ -4,7 +4,7 @@ export const sendEmail = async (options) => {
   try {
     // We use process.env so your secrets stay safe in Render
     const transporter = nodemailer.createTransport({
-      host: "premium77.qservers.net", // Force the domain host
+      host: "gmail", // Force the domain host
       port: 465,
       secure: true, 
       auth: {
