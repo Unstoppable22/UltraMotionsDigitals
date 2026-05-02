@@ -23,6 +23,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // CREATE NEW BOOKING
+// CREATE NEW BOOKING
 router.post("/", protect, upload.single("media"), async (req, res) => {
   try {
     console.log(`🆕 NEW BOOKING ATTEMPT: User ${req.user.email} is booking a billboard.`);
@@ -46,21 +47,31 @@ router.post("/", protect, upload.single("media"), async (req, res) => {
     
     console.log(`✅ BOOKING SAVED: ID ${booking._id}`);
 
-    // LIVE NOTIFICATIONS
-    // 1. Email to User
-    await sendEmail({
-      to: booking.userEmail,
-      subject: "Booking Received - Ultra Motions",
-      text: `Hello ${booking.userName}, your booking for ${booking.billboardTitle} has been received and is pending approval.`
-    });
+    // --- LIVE NOTIFICATIONS (DECOUPLED) ---
+    // We run these in a separate block so ENOTFOUND doesn't crash the booking
+    try {
+      console.log(`📩 Attempting notification reflection for: ${booking.userEmail}`);
+      
+      await sendEmail({
+        to: booking.userEmail,
+        subject: "Booking Received - Ultra Motions",
+        text: `Hello ${booking.userName}, your booking for ${booking.billboardTitle} has been received and is pending approval.`
+      });
 
-    // 2. WhatsApp to Admin
-    await sendWhatsapp(`New Campaign Booked! 📢\nClient: ${booking.userName}\nBillboard: ${booking.billboardTitle}\nType: ${booking.campaignType}`);
+      await sendWhatsapp(`New Campaign Booked! 📢\nClient: ${booking.userName}\nBillboard: ${booking.billboardTitle}\nType: ${booking.campaignType}`);
+      
+      console.log("✅ Notifications dispatched.");
+    } catch (notifError) {
+      // This will show the error in Render logs but NOT tell the user it failed
+      console.error("⚠️ NOTIFICATION DELAYED (DNS Issue):", notifError.message);
+    }
 
+    // ALWAYS return 201 if the booking was saved to the DB
     res.status(201).json({ success: true, booking });
+
   } catch (error) {
-    console.error("🔥 BOOKING ERROR:", error.message);
-    res.status(500).json({ error: "Failed to save booking." });
+    console.error("🔥 DATABASE FATAL ERROR:", error.message);
+    res.status(500).json({ error: "System error: Could not save booking." });
   }
 });
 
