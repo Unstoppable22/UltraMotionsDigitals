@@ -2,22 +2,18 @@ import nodemailer from "nodemailer";
 
 export const sendEmail = async (options) => {
   try {
-    // We use process.env so your secrets stay safe in Render
     const transporter = nodemailer.createTransport({
-      host: "gmail", // Force the domain host
-      port: 465,
-      secure: true, 
+      // 🚨 CRITICAL: Use 'service' NOT 'host'
+      service: "gmail", 
       auth: {
-        user: process.env.EMAIL_USER, 
-        pass: process.env.EMAIL_PASS, 
+        user: process.env.EMAIL_USER, // Your Gmail address
+        pass: process.env.EMAIL_PASS, // Your 16-character App Password
       },
-      tls: {
-        rejectUnauthorized: false 
-      }
     });
 
-    console.log(`📩 Attempting delivery via QServers to: ${options.to}`);
-    
+    // Updated log to confirm the code change is live
+    console.log(`📩 GMAIL SYSTEM: Sending notification to ${options.to}`);
+
     await transporter.verify();
     
     const info = await transporter.sendMail({
@@ -27,10 +23,10 @@ export const sendEmail = async (options) => {
       text: options.text,
     });
 
-    console.log("✅ Email Reflection Successful");
+    console.log("✅ GMAIL DELIVERY SUCCESSFUL");
     return info;
   } catch (error) {
-    console.error("🔥 Reflection Error:", error.message);
+    console.error("🔥 GMAIL SYSTEM ERROR:", error.message);
     throw error;
   }
 };
